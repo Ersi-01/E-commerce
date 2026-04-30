@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import products from "./products";
+import products from "../data/products"; 
 
 type Product = {
   id: number;
@@ -13,7 +13,7 @@ type Product = {
   description: string;
 };
 
-export default function ProductsScreen() {  
+export default function ProductsScreen() {
   const renderItem = ({ item }: { item: Product }) => (
     <View>
       <Text>{item.name}</Text>
@@ -37,7 +37,7 @@ export default function ProductsScreen() {
 
       <FlatList
         data={products}
-        keyExtractor={(item: Product) => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()} 
         renderItem={renderItem}
       />
     </View>
