@@ -7,7 +7,7 @@ import {
   FlatList,
 } from "react-native";
 import { Menu, X } from "lucide-react-native";
-import products from "../data/product";
+import products from "../data/products";
 
 const categories = [
   "All",
@@ -50,19 +50,20 @@ export default function Catalogue() {
     </View>
   );
 
-  const renderSidebar = () => {
-    if (!sidebarOpen) return null;
-
-    return (
+  return (
+    <View>
       <View>
-        <View>
-          <View>
-            <Text>Categories</Text>
-            <TouchableOpacity onPress={() => setSidebarOpen(false)}>
-              <X size={24} color="black" />
-            </TouchableOpacity>
-          </View>
+        <TouchableOpacity onPress={() => setSidebarOpen(true)}>
+          <Menu size={24} color="white" />
+        </TouchableOpacity>
+        <Text>Catalogue</Text>
+      </View>
 
+      {sidebarOpen && (
+        <View>
+          <TouchableOpacity onPress={() => setSidebarOpen(false)}>
+            <Text>Close Categories</Text>
+          </TouchableOpacity>
           <ScrollView>
             {categories.map((category) => (
               <TouchableOpacity
@@ -74,36 +75,21 @@ export default function Catalogue() {
             ))}
           </ScrollView>
         </View>
-      </View>
-    );
-  };
-
-  return (
-    <View>
-      <View>
-        <TouchableOpacity onPress={() => setSidebarOpen(true)}>
-          <Menu size={24} color="black" />
-        </TouchableOpacity>
-        <Text>Catalogue</Text>
-        <View />
-      </View>
+      )}
 
       <View>
         <Text>{selectedCategory} Products</Text>
+        <FlatList
+          data={filteredProducts}
+          renderItem={renderProduct}
+          keyExtractor={(item) => item.id.toString()}
+          ListEmptyComponent={
+            <View>
+              <Text>No products found in {selectedCategory}</Text>
+            </View>
+          }
+        />
       </View>
-
-      <FlatList
-        data={filteredProducts}
-        renderItem={renderProduct}
-        keyExtractor={(item) => item.id.toString()}
-        ListEmptyComponent={
-          <View>
-            <Text>No products found in {selectedCategory}</Text>
-          </View>
-        }
-      />
-
-      {renderSidebar()}
     </View>
   );
 }

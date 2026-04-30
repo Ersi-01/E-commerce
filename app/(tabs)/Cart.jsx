@@ -1,8 +1,8 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import products from "../data/product";
+import products from "../data/products";
 
 export default function Cart() {
-  const products = products
+  const products = products;
 
   if (products && products.length > 0) {
     return (
@@ -16,7 +16,7 @@ export default function Cart() {
               <Text style={styles.name}>Remove</Text>
             </Pressable>
             <Text style={styles.name}>{product.name}</Text>
-              <Text style={styles.price}>Price: ${product.price}</Text>
+            <Text style={styles.price}>Price: ${product.price}</Text>
           </View>
         ))}
       </View>
