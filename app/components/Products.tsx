@@ -13,9 +13,15 @@ type Product = {
   description: string;
 };
 
-export default function ProductsScreen() {  
+export default function ProductsScreen() {
+
+  const addToWishlist = (item: Product) => {
+    console.log("Added to wishlist:", item);
+  };
+
   const renderItem = ({ item }: { item: Product }) => (
-    <View>
+    <View style={{ padding: 10, marginBottom: 10, borderWidth: 1 }}>
+      
       <Text>{item.name}</Text>
       <Text>{item.category}</Text>
       <Text>{item.description}</Text>
@@ -26,14 +32,25 @@ export default function ProductsScreen() {
       </Text>
 
       <TouchableOpacity disabled={!item.inStock}>
-        <Text>{item.inStock ? "Add to Cart" : "Unavailable"}</Text>
+        <Text>
+          {item.inStock ? "Add to Cart" : "Unavailable"}
+        </Text>
       </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => addToWishlist(item)}>
+        <Text style={{ color: "red", marginTop: 5 }}>
+          ❤️ Add to Wishlist
+        </Text>
+      </TouchableOpacity>
+
     </View>
   );
 
   return (
-    <View>
-      <Text>Products</Text>
+    <View style={{ flex: 1, padding: 10 }}>
+      <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+        Products
+      </Text>
 
       <FlatList
         data={products}
