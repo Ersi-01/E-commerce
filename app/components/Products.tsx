@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import products from "../data/products"; 
+import products from "../data/products";
 
 type Product = {
   id: number;
@@ -21,9 +21,7 @@ export default function ProductsScreen() {
       <Text>{item.description}</Text>
       <Text>${item.price}</Text>
       <Text>⭐ {item.rating}</Text>
-      <Text>
-        {item.inStock ? `In Stock: ${item.stock}` : "Out of Stock"}
-      </Text>
+      <Text>{item.inStock ? `In Stock: ${item.stock}` : "Out of Stock"}</Text>
 
       <TouchableOpacity disabled={!item.inStock}>
         <Text>{item.inStock ? "Add to Cart" : "Unavailable"}</Text>
@@ -37,7 +35,7 @@ export default function ProductsScreen() {
 
       <FlatList
         data={products}
-        keyExtractor={(item) => item.id.toString()} 
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
       />
     </View>
