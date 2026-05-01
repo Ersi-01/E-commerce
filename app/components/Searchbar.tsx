@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TextInput, FlatList, Text } from "react-native";
-import products from "./data/products"; 
+import products from "../data/products"; 
 
 export default function Searchbar() {
   const [search, setSearch] = useState("");

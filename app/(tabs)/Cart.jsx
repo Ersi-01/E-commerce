@@ -1,24 +1,57 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import products from "../data/products";
+import { useEffect, useState } from "react";
+import { getCart, removeFromCart } from "../storage/cartStorage";
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
+import { router } from "expo-router";
+
 
 export default function Cart() {
-  const products = products;
+  const [cartProducts, setCartProducts] = useState([]);
 
-  if (products && products.length > 0) {
+  useFocusEffect(
+    useCallback(() => {
+      loadCart();
+    }, [])
+  );
+
+
+  async function loadCart() {
+    const data = await getCart();
+    setCartProducts(data);
+  }
+
+  useEffect(() => {
+    loadCart();
+  }, []);
+
+  async function handleRemove(id) {
+    await removeFromCart(id);
+    loadCart();
+  }
+
+  if (cartProducts.length > 0) {
     return (
       <View style={styles.container}>
-        {products.map((product) => (
+        {cartProducts.map((product) => (
           <View key={product.id} style={styles.card}>
             <Pressable
-              onPress={() => console.log("Remove product", product.id)}
+              onPress={() => handleRemove(product.id)}
               style={styles.pressable}
             >
               <Text style={styles.name}>Remove</Text>
             </Pressable>
+
             <Text style={styles.name}>{product.name}</Text>
             <Text style={styles.price}>Price: ${product.price}</Text>
           </View>
         ))}
+        <Pressable
+          style={styles.checkoutButton}
+          onPress={() => router.push("/checkout")}
+        >
+          <Text style={styles.checkoutText}>Go to Checkout</Text>
+        </Pressable>
       </View>
     );
   }
@@ -33,8 +66,9 @@ export default function Cart() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000", // black background
+    backgroundColor: "#000",
     padding: 16,
+    justifyContent: "space-between",
   },
 
   card: {
@@ -47,7 +81,19 @@ const styles = StyleSheet.create({
   pressable: {
     gap: 4,
   },
+  checkoutButton: {
+    backgroundColor: "#fff",
+    padding: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+  },
 
+  checkoutText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   name: {
     color: "#fff",
     fontSize: 16,
