@@ -43,10 +43,10 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Hero */}
+    
       <View style={[S.cardElevated, styles.hero]}>
         <Text style={S.label}>Featured</Text>
-        <Text style={styles.heroTitle}>Explore our{"\n"}latest products</Text>
+        <Text style={styles.heroTitle}>Explore our{"\n"}latest products in clothes</Text>
         <Text style={S.body}>Discover trending items handpicked for you.</Text>
         <TouchableOpacity
           style={[S.btnPrimary, styles.heroBtn]}
@@ -56,7 +56,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Stats */}
+    
       <View style={[S.card, styles.statsRow]}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>120+</Text>
@@ -76,7 +76,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Quick Access */}
+  
       <Text style={S.sectionTitle}>Quick Access</Text>
 
       <View style={S.rowWrap}>
@@ -93,7 +93,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={[S.card, styles.navCard]}
-          onPress={() => router.push("/(tabs)/cart")}
+          onPress={() => router.push("/(tabs)/Cart")}
           activeOpacity={0.75}
         >
           <Text style={styles.navIcon}>🛒</Text>
