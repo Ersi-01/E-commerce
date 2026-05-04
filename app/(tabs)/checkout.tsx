@@ -47,8 +47,8 @@ export default function Checkout({ navigation }: Props) {
 
 	async function handlePlaceOrder(): Promise<void> {
 		if (!form.name.trim() || !form.address.trim() || !form.city.trim()) {
-		Alert.alert("Missing info", "Please fill in all fields.");
-		return;
+			Alert.alert("Missing info", "Please fill in all fields.");
+			return;
 		}
 		setPlacing(true);
 		await saveCart([]);
@@ -78,8 +78,6 @@ export default function Checkout({ navigation }: Props) {
 			contentContainerStyle={{ padding: Spacing.lg, paddingBottom: 48 }}
 		>
 		<Text style={S.heading}>Checkout</Text>
-
-		{/* Order Summary */}
 		<Text style={S.sectionTitle}>Order Summary</Text>
 		<View style={S.card}>
 			{cart.map((product: Product) => (
@@ -100,8 +98,6 @@ export default function Checkout({ navigation }: Props) {
 				<Text style={[S.price, { fontSize: Typography.lg }]}>${total}</Text>
 			</View>
 		</View>
-
-		{/* Shipping Info */}
 		<Text style={S.sectionTitle}>Shipping Info</Text>
 		<View style={S.card}>
 			{(["name", "address", "city"] as (keyof ShippingForm)[]).map((field, i, arr) => (
@@ -119,7 +115,6 @@ export default function Checkout({ navigation }: Props) {
 				</View>
 			))}
 		</View>
-
 		<Pressable
 			style={({ pressed }) => [
 				S.btnPrimary,
