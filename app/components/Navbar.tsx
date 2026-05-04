@@ -9,7 +9,7 @@ import Searchbar from "@/app/components/Searchbar";
 type Props = {
   search: string;
   setSearch: (value: string) => void;
-};
+}
 
 export default function Navbar({ search, setSearch }: Props) {
   const [isOpen, setIsOpen] = useState(false);
