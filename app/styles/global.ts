@@ -2,26 +2,8 @@
  * Import tokens:   import { Colors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
  * Import styles:   import S from "@/app/styles/global";
 
- *** ONLY FOR DEVELOPERS (this comment will be deleted after the deadline)
- 
- (Suggested)
- *** In order to implement these styles please paste this file and your code into an AI using this prompt:
- * You are working in a React Native project with a shared design system:
+ *** ONLY FOR DEVELOPERS
 
-   import { Colors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
-   import S from "@/app/styles/global";
-
-   Refactor the code I give you by removing all local StyleSheet.create styles and replacing them with the global design system.
-   Rules:
-   Remove all hardcoded values (colors, spacing, radius, font sizes, shadows).
-   Replace them with Colors, Spacing, Radius, Typography, Shadows.
-   Use S.* whenever an existing shared style matches.
-   Do not change any logic, only styling.
-   Do not create new style systems or raw values.
-
-   Return only the refactored code.
- * 
- *** OR, if you dont want to use AI please use these steps
  * Manual migration to global styles
    1. Import:
    import S from "@/app/styles/global";
@@ -53,7 +35,7 @@ export const Colors = {
   textMuted:    "#94a3b8",
   textDim:      "#64748b",
 
-  accent:       "#4f46e5",   // clean indigo
+  accent:       "#4f46e5", 
   accentDark:   "#ffffff",
 
   success:      "#16a34a",

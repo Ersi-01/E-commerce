@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { useEffect, useState, useCallback } from "react";
-import { getCart, removeFromCart } from "../storage/cartStorage";
+import { getCart, removeFromCart, increaseCount, decreaseCount } from "../storage/cartStorage";
 import { useFocusEffect, router } from "expo-router";
 
 import S, { Spacing } from "@/app/styles/global";
@@ -39,6 +39,23 @@ export default function Cart() {
               </Pressable>
 
               <Text style={S.subheading}>{product.name}</Text>
+              <Pressable onPress={async () => {
+                await increaseCount(product.id);
+                loadCart();
+              }}>
+                <Text>+</Text>
+              </Pressable>
+              <Text>
+                Quantity: {product.count || 1}
+              </Text>
+
+              <Pressable onPress={async () => {
+                await decreaseCount(product.id);
+                loadCart();
+              }}>
+                <Text>-</Text>
+              </Pressable>
+
               <Text style={S.price}>Price: ${product.price}</Text>
             </View>
           ))}
