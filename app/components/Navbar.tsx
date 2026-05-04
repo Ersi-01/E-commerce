@@ -1,27 +1,33 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
-import { ShoppingCart, User, Menu, X, Search } from "lucide-react-native";
-import { Colors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
-import S from "@/app/styles/global";
+import { View, Text, TouchableOpacity } from "react-native";
+import { ShoppingCart, User, Menu, X } from "lucide-react-native";
 
-export default function Navbar() {
+import { Colors, Spacing, Typography, Shadows } from "@/app/styles/global";
+import S from "@/app/styles/global";
+import Searchbar from "@/app/components/Searchbar";
+
+type Props = {
+  search: string;
+  setSearch: (value: string) => void;
+};
+
+export default function Navbar({ search, setSearch }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const cartCount = 3;
 
   return (
     <View style={[S.card, { padding: Spacing.sm }, Shadows.card]}>
+      
       {/* Top Row */}
       <View style={S.rowBetween}>
         {/* Logo */}
-        <Text style={[S.subheading, { marginBottom: 0 }]}>ShopLogo</Text>
+        <Text style={[S.subheading, { marginBottom: 0 }]}>
+          ShopLogo
+        </Text>
 
         {/* Icons */}
         <View style={[S.rowBetween, { gap: Spacing.lg }]}>
+          
           {/* Cart */}
           <View style={{ position: "relative" }}>
             <ShoppingCart color={Colors.textPrimary} size={22} />
@@ -46,23 +52,24 @@ export default function Navbar() {
         </View>
       </View>
 
-      {/* Search */}
-      <View style={[S.inputWrapper, { marginTop: Spacing.sm }]}>
-        <Search size={Typography.md} color={Colors.textDim} />
-        <TextInput
-          placeholder="Search products..."
-          placeholderTextColor={Colors.textMuted}
-          style={[S.inputText, { marginLeft: Spacing.xs }]}
-        />
-      </View>
+      {/* Search (now functional) */}
+      <Searchbar search={search} setSearch={setSearch} />
 
       {/* Mobile Menu */}
       {isOpen && (
         <View style={{ marginTop: Spacing.sm }}>
-          <Text style={[S.body, { paddingVertical: Spacing.sm }]}>Home</Text>
-          <Text style={[S.body, { paddingVertical: Spacing.sm }]}>Shop</Text>
-          <Text style={[S.body, { paddingVertical: Spacing.sm }]}>Categories</Text>
-          <Text style={[S.body, { paddingVertical: Spacing.sm }]}>Deals</Text>
+          <Text style={[S.body, { paddingVertical: Spacing.sm }]}>
+            Home
+          </Text>
+          <Text style={[S.body, { paddingVertical: Spacing.sm }]}>
+            Shop
+          </Text>
+          <Text style={[S.body, { paddingVertical: Spacing.sm }]}>
+            Categories
+          </Text>
+          <Text style={[S.body, { paddingVertical: Spacing.sm }]}>
+            Deals
+          </Text>
         </View>
       )}
     </View>
