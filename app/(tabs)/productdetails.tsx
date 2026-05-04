@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
+
 import products from "../data/products";
 import { getCart, addToCart } from "../storage/cartStorage";
-import { useEffect, useState } from "react";
 
+import S, { Spacing } from "@/app/styles/global";
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
@@ -13,6 +14,7 @@ export default function ProductDetails() {
   const currentId = Number(id);
   const prevProduct = products.find((p) => p.id === currentId - 1);
   const nextProduct = products.find((p) => p.id === currentId + 1);
+
   const [inCart, setInCart] = useState(false);
 
   useEffect(() => {
@@ -32,7 +34,6 @@ export default function ProductDetails() {
     });
   }
 
-
   async function handleAddToCart() {
     if (!product) return;
 
@@ -51,17 +52,17 @@ export default function ProductDetails() {
 
   if (!product) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.notFound}>Product not found</Text>
+      <View style={S.centered}>
+        <Text style={S.outOfStock}>Product not found</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Product Details</Text>
+    <ScrollView contentContainerStyle={S.screen}>
+      <Text style={S.heading}>Product Details</Text>
 
-      <View style={styles.card}>
+      <View style={[S.card, { gap: Spacing.sm }]}>
         <DetailRow label="ID" value={product.id} />
         <DetailRow label="Name" value={product.name} />
         <DetailRow label="Category" value={product.category} />
@@ -73,115 +74,56 @@ export default function ProductDetails() {
 
       <Pressable
         style={[
-          styles.button,
-          (!product.inStock || inCart) && styles.buttonDisabled
+          S.btnPrimary,
+          (!product.inStock || inCart) && S.btnDisabled,
+          { marginTop: Spacing.lg },
         ]}
         onPress={handleAddToCart}
         disabled={!product.inStock || inCart}
       >
-        <Text style={styles.buttonText}>
+        <Text style={S.btnPrimaryText}>
           {!product.inStock
             ? "Out of Stock"
             : inCart
-              ? "Already in Cart"
-              : "Add to Cart"}
+            ? "Already in Cart"
+            : "Add to Cart"}
         </Text>
       </Pressable>
 
-      <View style={styles.navContainer}>
+      <View style={[S.rowBetween, { marginTop: Spacing.lg, gap: Spacing.sm }]}>
         <Pressable
-          style={[styles.navButton, !prevProduct && { opacity: 0.5 }]}
+          style={[
+            S.btnSecondary,
+            !prevProduct && { opacity: 0.5 },
+            { flex: 1 },
+          ]}
           disabled={!prevProduct}
           onPress={() => prevProduct && goToProduct(prevProduct.id)}
         >
-          <Text style={styles.navText}>Previous</Text>
+          <Text style={S.btnSecondaryText}>Previous</Text>
         </Pressable>
 
         <Pressable
-          style={[styles.navButton, !nextProduct && { opacity: 0.5 }]}
+          style={[
+            S.btnSecondary,
+            !nextProduct && { opacity: 0.5 },
+            { flex: 1 },
+          ]}
           disabled={!nextProduct}
           onPress={() => nextProduct && goToProduct(nextProduct.id)}
         >
-          <Text style={styles.navText}>Next</Text>
+          <Text style={S.btnSecondaryText}>Next</Text>
         </Pressable>
       </View>
-      
     </ScrollView>
-
   );
 }
 
-type DetailRowProps = {
-  label: string;
-  value: string | number;
-};
-
-function DetailRow({ label, value }: DetailRowProps) {
+function DetailRow({ label, value }) {
   return (
-    <View style={styles.row}>
-      <Text style={styles.label}>{label}:</Text>
-      <Text style={styles.value}>{String(value)}</Text>
+    <View style={S.rowWrap}>
+      <Text style={S.label}>{label}:</Text>
+      <Text style={S.body}>{String(value)}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 16 },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  notFound: { fontSize: 18, color: "red" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
-  button: {
-    marginTop: 20,
-    backgroundColor: "#000",
-    padding: 14,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    backgroundColor: "#777",
-    opacity: 0.6,
-  },
-  navContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-    gap: 10,
-  },
-
-  navButton: {
-    flex: 1,
-    backgroundColor: "#333",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-
-  navButtonDisabled: {
-    backgroundColor: "#1a1a1a",
-    opacity: 0.5,
-  },
-
-  navText: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  card: {
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    padding: 16,
-    gap: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: 4 },
-  label: { fontWeight: "600", fontSize: 15, color: "#333" },
-  value: { fontSize: 15, color: "#555", flexShrink: 1 },
-});
