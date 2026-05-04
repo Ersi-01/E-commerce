@@ -20,7 +20,6 @@ export default function Navbar({ search, setSearch }: Props) {
 
   const router = useRouter();
 
-  // ✅ better than useEffect: updates when screen comes back into focus
   useFocusEffect(
     useCallback(() => {
       loadCartCount();
