@@ -1,98 +1,218 @@
-// import { Image } from 'expo-image';
-// import { Platform, StyleSheet } from 'react-native';
+\import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useWishlist } from "../context/WishlistContext";
+import { Colors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
+import S from "@/app/styles/global";
 
-// import { HelloWave } from '@/components/hello-wave';
-// import ParallaxScrollView from '@/components/parallax-scroll-view';
-// import { ThemedText } from '@/components/themed-text';
-// import { ThemedView } from '@/components/themed-view';
-// import { Link } from 'expo-router';
+export default function HomeScreen() {
+  const router = useRouter();
+  const { wishlist } = useWishlist();
 
-// export default function HomeScreen() {
-//   return (
-//     <ParallaxScrollView
-//       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-//       headerImage={
-//         <Image
-//           source={require('@/assets/images/partial-react-logo.png')}
-//           style={styles.reactLogo}
-//         />
-//       }>
-//       <ThemedView style={styles.titleContainer}>
-//         <ThemedText type="title">Welcome!</ThemedText>
-//         <HelloWave />
-//       </ThemedView>
-//       <ThemedView style={styles.stepContainer}>
-//         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-//         <ThemedText>
-//           Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-//           Press{' '}
-//           <ThemedText type="defaultSemiBold">
-//             {Platform.select({
-//               ios: 'cmd + d',
-//               android: 'cmd + m',
-//               web: 'F12',
-//             })}
-//           </ThemedText>{' '}
-//           to open developer tools.
-//         </ThemedText>
-//       </ThemedView>
-//       <ThemedView style={styles.stepContainer}>
-//         <Link href="/modal">
-//           <Link.Trigger>
-//             <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-//           </Link.Trigger>
-//           <Link.Preview />
-//           <Link.Menu>
-//             <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-//             <Link.MenuAction
-//               title="Share"
-//               icon="square.and.arrow.up"
-//               onPress={() => alert('Share pressed')}
-//             />
-//             <Link.Menu title="More" icon="ellipsis">
-//               <Link.MenuAction
-//                 title="Delete"
-//                 icon="trash"
-//                 destructive
-//                 onPress={() => alert('Delete pressed')}
-//               />
-//             </Link.Menu>
-//           </Link.Menu>
-//         </Link>
+  return (
+    <ScrollView
+      style={S.screenNoPad}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={S.blobTop} pointerEvents="none" />
+      <View style={S.blobBottom} pointerEvents="none" />
 
-//         <ThemedText>
-//           {`Tap the Explore tab to learn more about what's included in this starter app.`}
-//         </ThemedText>
-//       </ThemedView>
-//       <ThemedView style={styles.stepContainer}>
-//         <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-//         <ThemedText>
-//           {`When you're ready, run `}
-//           <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-//           <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-//           <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-//           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-//         </ThemedText>
-//       </ThemedView>
-//     </ParallaxScrollView>
-//   );
-// }
+      {/* Header */}
+      <View style={S.screenHeader}>
+        <View>
+          <Text style={S.caption}>Welcome back 👋</Text>
+          <Text style={styles.appName}>ShopApp</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.heartBtn}
+          onPress={() => router.push("/(tabs)/wishlist")}
+        >
+          <Text style={styles.heartIcon}>❤️</Text>
+          {wishlist.length > 0 && (
+            <View style={[S.badge, styles.badgeOverlay]}>
+              <Text style={S.badgeText}>{wishlist.length}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
 
-// const styles = StyleSheet.create({
-//   titleContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     gap: 8,
-//   },
-//   stepContainer: {
-//     gap: 8,
-//     marginBottom: 8,
-//   },
-//   reactLogo: {
-//     height: 178,
-//     width: 290,
-//     bottom: 0,
-//     left: 0,
-//     position: 'absolute',
-//   },
-// });
+      {/* Hero */}
+      <View style={[S.cardElevated, styles.hero]}>
+        <Text style={S.label}>Featured</Text>
+        <Text style={styles.heroTitle}>Explore our{"\n"}latest products</Text>
+        <Text style={S.body}>Discover trending items handpicked for you.</Text>
+        <TouchableOpacity
+          style={[S.btnPrimary, styles.heroBtn]}
+          onPress={() => router.push("/(tabs)/catalogue")}
+        >
+          <Text style={S.btnPrimaryText}>Browse Catalogue →</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Stats */}
+      <View style={[S.card, styles.statsRow]}>
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>120+</Text>
+          <Text style={S.caption}>Products</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>8</Text>
+          <Text style={S.caption}>Categories</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statNumber, { color: Colors.accent }]}>
+            {wishlist.length}
+          </Text>
+          <Text style={S.caption}>Saved</Text>
+        </View>
+      </View>
+
+      {/* Quick Access */}
+      <Text style={S.sectionTitle}>Quick Access</Text>
+
+      <View style={S.rowWrap}>
+        <TouchableOpacity
+          style={[S.card, styles.navCard]}
+          onPress={() => router.push("/(tabs)/catalogue")}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.navIcon}>🛍️</Text>
+          <Text style={S.subheading}>Catalogue</Text>
+          <Text style={S.caption}>Browse all products</Text>
+          <Text style={styles.navArrow}>→</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[S.card, styles.navCard]}
+          onPress={() => router.push("/(tabs)/cart")}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={S.subheading}>Cart</Text>
+          <Text style={S.caption}>View your cart</Text>
+          <Text style={styles.navArrow}>→</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[S.card, styles.navCardAccent]}
+          onPress={() => router.push("/(tabs)/wishlist")}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.navIcon}>❤️</Text>
+          <Text style={[S.subheading, { color: Colors.accent }]}>Wishlist</Text>
+          <Text style={S.caption}>Your saved items</Text>
+          <Text style={[styles.navArrow, { color: Colors.accent }]}>→</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={[S.caption, styles.footer]}>ShopApp • v1.0</Text>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    padding: Spacing.lg,
+    paddingTop: Spacing.xl + Spacing.xxl,
+    paddingBottom: Spacing.xxxl,
+  },
+  appName: {
+    color: Colors.textPrimary,
+    fontSize: Typography.h1,
+    fontWeight: Typography.extrabold,
+    letterSpacing: -0.5,
+  },
+  heartBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heartIcon: {
+    fontSize: Typography.xl,
+  },
+  badgeOverlay: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: Colors.danger,
+  },
+  hero: {
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  heroTitle: {
+    color: Colors.textPrimary,
+    fontSize: Typography.h1,
+    fontWeight: Typography.extrabold,
+    lineHeight: 38,
+    letterSpacing: -0.5,
+  },
+  heroBtn: {
+    alignSelf: "flex-start",
+    paddingHorizontal: Spacing.xl,
+    height: 48,
+    borderRadius: Radius.xxl,
+    marginTop: Spacing.sm,
+  },
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statNumber: {
+    color: Colors.textPrimary,
+    fontSize: Typography.xxl,
+    fontWeight: Typography.extrabold,
+  },
+  statDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: Colors.border,
+  },
+  navCard: {
+    flex: 1,
+    minWidth: "45%",
+    gap: Spacing.xs,
+  },
+  navCardAccent: {
+    flex: 1,
+    minWidth: "45%",
+    gap: Spacing.xs,
+    borderColor: Colors.accent,
+  },
+  navIcon: {
+    fontSize: Typography.xxl,
+    marginBottom: Spacing.xs,
+  },
+  navArrow: {
+    color: Colors.textDim,
+    fontSize: Typography.lg,
+    fontWeight: Typography.bold,
+    marginTop: Spacing.sm,
+  },
+  footer: {
+    textAlign: "center",
+    marginTop: Spacing.xxxl,
+  },
+});
