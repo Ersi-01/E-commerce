@@ -1,16 +1,14 @@
-import React, { useState } from "react";
-import { View, TextInput, FlatList, Text } from "react-native";
-import products from "./data/products"; 
+import React from "react";
+import { View, TextInput } from "react-native";
 
-export default function Searchbar() {
-  const [search, setSearch] = useState("");
+type Props = {
+  search: string;
+  setSearch: (value: string) => void;
+};
 
-  const filteredData = products.filter((item) =>
-    item.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
+export default function Searchbar({ search, setSearch }: Props) {
   return (
-    <View style={{ padding: 20, marginTop: 50 }}>
+    <View style={{ marginBottom: 16 }}>
       <TextInput
         placeholder="Search products..."
         value={search}
@@ -21,19 +19,8 @@ export default function Searchbar() {
           borderColor: "#ccc",
           paddingHorizontal: 10,
           borderRadius: 8,
-          marginBottom: 20,
+          backgroundColor: "#fff",
         }}
-      />
-
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.id.toString()} // important because id is a number
-        renderItem={({ item }) => (
-          <View style={{ padding: 10 }}>
-            <Text style={{ fontSize: 18 }}>{item.name}</Text>
-            <Text style={{ color: "gray" }}>${item.price}</Text>
-          </View>
-        )}
       />
     </View>
   );

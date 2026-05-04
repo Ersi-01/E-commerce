@@ -1,21 +1,27 @@
 import React, { useState, useMemo } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-import products from "@/data/products";
+import products from "../data/products";
 import Filter, { FilterOptions } from "./Filter";
 import { useWishlist } from "../context/WishlistContext";
+import Searchbar from "./Searchbar";
 
 export default function Catalogue() {
+   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<FilterOptions>({
     category: "All",
     sortBy: null,
     inStockOnly: false,
   });
 
+ 
   const { addToWishlist, isInWishlist } = useWishlist();
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
+    result = result.filter((item) =>
+  item.name.toLowerCase().includes(search.toLowerCase())
+);
     if (filters.category !== "All") {
       result = result.filter((p) => p.category === filters.category);
     }
@@ -31,7 +37,7 @@ export default function Catalogue() {
     }
 
     return result;
-  }, [filters]);
+  }, [filters,search]);
 
   return (
     <View style={styles.container}>
@@ -39,7 +45,7 @@ export default function Catalogue() {
         <Text style={styles.title}>Catalogue</Text>
         <Filter onFilterChange={setFilters} />
       </View>
-
+<Searchbar search={search} setSearch={setSearch} />
       <Text style={styles.count}>{filteredProducts.length} produkte</Text>
 
       <FlatList
