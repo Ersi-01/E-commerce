@@ -24,7 +24,7 @@ export default function HomeScreen() {
       <View style={S.blobTop} pointerEvents="none" />
       <View style={S.blobBottom} pointerEvents="none" />
 
-      {/* Header */}
+    
       <View style={S.screenHeader}>
         <View>
           <Text style={S.caption}>Welcome back 👋</Text>
