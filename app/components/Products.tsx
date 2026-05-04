@@ -1,6 +1,7 @@
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import products from "../data/products";
 import { useWishlist } from "../context/WishlistContext";
+import { addToCart } from "../storage/cartStorage";
 import S from "@/app/styles/global";
 
 type Product = {
@@ -31,6 +32,7 @@ export default function ProductsScreen() {
       <TouchableOpacity
         style={[S.btnSecondary, !item.inStock && S.btnDisabled]}
         disabled={!item.inStock}
+        onPress={() => addToCart(item)}
       >
         <Text style={S.btnSecondaryText}>
           {item.inStock ? "Add to Cart" : "Unavailable"}
@@ -52,7 +54,6 @@ export default function ProductsScreen() {
   return (
     <View style={S.screen}>
       <Text style={S.heading}>Products</Text>
-
       <FlatList
         data={products}
         keyExtractor={(item: { id: number }) => item.id.toString()}

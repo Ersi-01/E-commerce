@@ -43,22 +43,26 @@
 import { StyleSheet } from "react-native";
 
 export const Colors = {
-  bg:           "#0a0a0f",
-  card:         "#13131a",
-  input:        "#1a1a24",
-  border:       "#2a2a3a",
-  textPrimary:  "#ffffff",
-  textSecondary:"#aaaaaa",
-  textMuted:    "#666666",
-  textDim:      "#888888",
-  accent:       "#f0c060",
-  accentDark:   "#0a0a0f",
-  success:      "#4caf50",
-  danger:       "#f44336",
-  dangerBg:     "#ff444422",
-  dangerBorder: "#ff4444",
-  blobGold:     "#f0c06022",
-  blobBlue:     "#6060f022",
+  bg:           "#f6f7fb",
+  card:         "#ffffff",
+  input:        "#f1f3f9",
+  border:       "#e2e6f0",
+
+  textPrimary:  "#0f172a",
+  textSecondary:"#475569",
+  textMuted:    "#94a3b8",
+  textDim:      "#64748b",
+
+  accent:       "#4f46e5",   // clean indigo
+  accentDark:   "#ffffff",
+
+  success:      "#16a34a",
+  danger:       "#dc2626",
+  dangerBg:     "#dc262622",
+  dangerBorder: "#dc2626",
+
+  blobGold:     "#4f46e522",
+  blobBlue:     "#3b82f622",
 };
 
 export const Spacing = {
