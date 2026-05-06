@@ -247,7 +247,7 @@ export default function Profile() {
             }}
             activeOpacity={0.85}
           >
-            <CreditCard size={17} color={Colors.bg} />
+            <CreditCard size={17} color={"#120b0b"} />
             <Text style={{ color: "#120b0b" , fontWeight: "800", fontSize: Typography.xs + 1 }}>Top up</Text>
           </TouchableOpacity>
         </View>
