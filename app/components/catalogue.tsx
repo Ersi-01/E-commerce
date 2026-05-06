@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo,useRef } from "react";
 import { View, Text, FlatList, TouchableOpacity, Animated } from "react-native";
 import products from "../data/products";
 import Filter, { FilterOptions } from "./Filter";
 import { useWishlist } from "../context/WishlistContext";
 import Searchbar from "./Searchbar";
 import S, { Colors, Spacing } from "@/app/styles/global";
-import { useRef } from "react";
+
 
 export default function Catalogue() {
   const [search, setSearch] = useState("");

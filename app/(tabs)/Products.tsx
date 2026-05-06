@@ -6,7 +6,7 @@ import { addToCart } from "../storage/cartStorage";
 import Filter, { FilterOptions } from "../components/Filter";
 import S from "@/app/styles/global";
 import { useRef, useState, useMemo } from "react";
-
+import Searchbar from "../components/Searchbar";
 type Product = {
   id: number;
   name: string;
@@ -28,10 +28,16 @@ export default function ProductsScreen() {
   });
   const opacity = useRef(new Animated.Value(0)).current;
 
+  const[search,setSearch] =useState('')
+
   // Filter dhe sortim logjika
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
+
+    result = result.filter((item) =>
+  item.name.toLowerCase().includes(search.toLowerCase())
+);
     // Filter by category
     if (filters.category !== "All") {
       result = result.filter(p => p.category === filters.category);
@@ -50,7 +56,7 @@ export default function ProductsScreen() {
     }
 
     return result;
-  }, [filters]);
+  }, [filters ,search]);
 
   function showToast(message: string) {
     setToastMessage(message);
@@ -100,8 +106,11 @@ export default function ProductsScreen() {
     <View style={S.screen}>
       <View style={[S.screenHeader, { justifyContent: "space-between" }]}>
         <Text style={S.heading}>Products</Text>
+       
         <Filter onFilterChange={setFilters} />
+       
       </View>
+        <Searchbar search={search} setSearch={setSearch}/>
 
       {/* Products list */}
       {filteredProducts.length > 0 ? (
