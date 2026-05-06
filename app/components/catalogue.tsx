@@ -1,27 +1,31 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Animated } from "react-native";
 import products from "../data/products";
 import Filter, { FilterOptions } from "./Filter";
 import { useWishlist } from "../context/WishlistContext";
 import Searchbar from "./Searchbar";
+import S, { Colors, Spacing } from "@/app/styles/global";
+import { useRef } from "react";
 
 export default function Catalogue() {
-   const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<FilterOptions>({
     category: "All",
     sortBy: null,
     inStockOnly: false,
   });
+  const [toastMessage, setToastMessage] = useState("");
+  const opacity = useRef(new Animated.Value(0)).current;
 
- 
   const { addToWishlist, isInWishlist } = useWishlist();
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
     result = result.filter((item) =>
-  item.name.toLowerCase().includes(search.toLowerCase())
-);
+      item.name.toLowerCase().includes(search.toLowerCase())
+    );
+    
     if (filters.category !== "All") {
       result = result.filter((p) => p.category === filters.category);
     }
@@ -37,118 +41,119 @@ export default function Catalogue() {
     }
 
     return result;
-  }, [filters,search]);
+  }, [filters, search]);
+
+  function showToast(message: string) {
+    setToastMessage(message);
+    Animated.sequence([
+      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(1500),
+      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start();
+  }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Catalogue</Text>
+    <View style={S.screen}>
+      {/* Header with Title and Filter */}
+      <View style={[S.screenHeader, { justifyContent: "space-between", marginBottom: Spacing.lg }]}>
+        <Text style={S.heading}>Catalogue</Text>
         <Filter onFilterChange={setFilters} />
       </View>
-<Searchbar search={search} setSearch={setSearch} />
-      <Text style={styles.count}>{filteredProducts.length} produkte</Text>
 
+      {/* Searchbar */}
+      <Searchbar search={search} setSearch={setSearch} />
+
+      {/* Product count */}
+      <Text style={[S.label, { marginTop: Spacing.md, marginBottom: Spacing.md }]}>
+        {filteredProducts.length} {filteredProducts.length === 1 ? "produkt" : "produkte"}
+      </Text>
+
+      {/* Products List */}
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item.id.toString()}
+        scrollEnabled={true}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.category}>{item.category}</Text>
-            <Text style={styles.price}>${item.price}</Text>
-            <Text style={styles.rating}>⭐ {item.rating}</Text>
-            <Text style={item.inStock ? styles.inStock : styles.outOfStock}>
+          <View style={S.card}>
+            {/* Product Name */}
+            <Text style={S.subheading}>{item.name}</Text>
+
+            {/* Category */}
+            <Text style={[S.label, { marginTop: Spacing.xs }]}>{item.category}</Text>
+
+            {/* Description */}
+            <Text style={[S.body, { marginTop: Spacing.xs, marginBottom: Spacing.sm }]}>
+              {item.description}
+            </Text>
+
+            {/* Price */}
+            <Text style={[S.price, { marginTop: Spacing.xs }]}>${item.price}</Text>
+
+            {/* Rating */}
+            <Text style={[S.rating, { marginTop: Spacing.xs }]}>⭐ {item.rating}</Text>
+
+            {/* Stock Status */}
+            <Text style={[item.inStock ? S.inStock : S.outOfStock, { marginTop: Spacing.sm }]}>
               {item.inStock ? `In Stock (${item.stock})` : "Out of Stock"}
             </Text>
 
-            <TouchableOpacity 
-              style={{
-                marginTop: 10,
-                backgroundColor: isInWishlist(item.id) ? "#4caf50" : "#f0c060",
-                padding: 10,
-                borderRadius: 8,
-                alignItems: "center"
+            {/* Wishlist Button */}
+            <TouchableOpacity
+              style={[
+                S.btnChip,
+                {
+                  marginTop: Spacing.md,
+                  backgroundColor: isInWishlist(item.id) ? Colors.success : Colors.accent,
+                  borderColor: isInWishlist(item.id) ? Colors.success : Colors.accent,
+                },
+              ]}
+              onPress={() => {
+                addToWishlist(item);
+                showToast(
+                  isInWishlist(item.id)
+                    ? `${item.name} removed from wishlist`
+                    : `${item.name} added to wishlist!`
+                );
               }}
-              onPress={() => addToWishlist(item)}
             >
-              <Text style={{ color: "#000", fontWeight: "600" }}>
+              <Text
+                style={[
+                  S.btnChipText,
+                  {
+                    color: Colors.accentDark,
+                  },
+                ]}
+              >
                 {isInWishlist(item.id) ? "✓ In Wishlist" : "♡ Add to Wishlist"}
               </Text>
             </TouchableOpacity>
           </View>
         )}
         ListEmptyComponent={
-          <Text style={styles.empty}>Nuk u gjet asnjë produkt.</Text>
+          <Text style={S.emptyText}>Nuk u gjet asnjë produkt.</Text>
         }
+        
       />
+
+      {/* Toast Notification */}
+      <Animated.View
+        style={[
+          {
+            opacity,
+            position: "absolute",
+            bottom: 30,
+            alignSelf: "center",
+            backgroundColor: Colors.textPrimary,
+            paddingHorizontal: Spacing.lg,
+            paddingVertical: Spacing.md,
+            borderRadius: 24,
+          },
+        ]}
+      >
+        <Text style={{ color: Colors.card, fontSize: 14, fontWeight: "600" }}>
+          {toastMessage}
+        </Text>
+      </Animated.View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#0a0a0f", 
-    padding: 16 
-  },
-  header: {
-    flexDirection: "row", 
-    justifyContent: "space-between",
-    alignItems: "center", 
-    marginBottom: 8,
-  },
-  title: { 
-    color: "#fff", 
-    fontSize: 22, 
-    fontWeight: "700" 
-  },
-  count: { 
-    color: "#666", 
-    fontSize: 12, 
-    marginBottom: 12 
-  },
-  card: {
-    backgroundColor: "#13131a", 
-    borderRadius: 12,
-    padding: 14, 
-    marginBottom: 10,
-    borderWidth: 1, 
-    borderColor: "#2a2a3a",
-  },
-  name: { 
-    color: "#fff", 
-    fontSize: 16, 
-    fontWeight: "600" 
-  },
-  category: { 
-    color: "#888", 
-    fontSize: 12, 
-    marginTop: 2 
-  },
-  price: { 
-    color: "#f0c060", 
-    fontSize: 15, 
-    fontWeight: "700", 
-    marginTop: 6 
-  },
-  rating: { 
-    color: "#ccc", 
-    fontSize: 13, 
-    marginTop: 2 
-  },
-  inStock: { 
-    color: "#4caf50", 
-    fontSize: 12, 
-    marginTop: 4 
-  },
-  outOfStock: { 
-    color: "#f44336", 
-    fontSize: 12, 
-    marginTop: 4 
-  },
-  empty: { 
-    color: "#666", 
-    textAlign: "center", 
-    marginTop: 40 
-  },
-});
