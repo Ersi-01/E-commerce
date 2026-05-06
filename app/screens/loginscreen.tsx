@@ -43,7 +43,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const passwordRef = useRef<TextInput>(null);
 
-  // Animate in + check if user is already logged in
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
@@ -57,7 +56,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     try {
       const saved = await AsyncStorage.getItem(USER_KEY);
       if (saved) {
-        // User already logged in, skip login screen
         navigation?.navigate('Home');
       }
     } catch (e) {
@@ -99,7 +97,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
     setLoading(true);
     try {
-      // Save user to local storage so they stay logged in
       await AsyncStorage.setItem(USER_KEY, JSON.stringify({ email }));
       navigation?.navigate('Home');
     } catch (e) {
@@ -129,16 +126,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             },
           ]}
         >
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.brandName}>ShopWave</Text>
             <Text style={S.caption}>Sign in to continue</Text>
           </View>
 
-          {/* Card */}
           <View style={S.cardElevated}>
 
-            {/* Email */}
             <View style={styles.fieldGroup}>
               <Text style={S.label}>Email</Text>
               <TextInput
@@ -156,7 +150,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               {errors.email && <Text style={S.fieldError}>{errors.email}</Text>}
             </View>
 
-            {/* Password */}
             <View style={styles.fieldGroup}>
               <Text style={S.label}>Password</Text>
               <View style={[S.inputWrapper, errors.password ? S.inputError : null]}>
@@ -181,7 +174,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               {errors.password && <Text style={S.fieldError}>{errors.password}</Text>}
             </View>
 
-            {/* Sign in button */}
             <TouchableOpacity
               style={[S.btnPrimary, loading && S.btnDisabled]}
               onPress={handleLogin}
@@ -194,7 +186,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
               }
             </TouchableOpacity>
 
-            {/* Sign up link */}
+
             <TouchableOpacity
               style={styles.signupRow}
               onPress={() => navigation?.navigate('Register')}
