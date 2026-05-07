@@ -33,12 +33,17 @@ export default function Navbar({ search, setSearch }: Props) {
   }
 
   return (
+<<<<<<< HEAD
     <View style={[S.card, { padding: Spacing.sm, marginTop: 30 }, Shadows.card]}>
 
+=======
+    <View style={[S.card, { padding: Spacing.sm }, Shadows.card]}>
+      
+>>>>>>> 537fbc0789d099731389521596cfcde6a8b37210
       {/* TOP BAR */}
       <View style={S.rowBetween}>
         <Text style={[S.subheading, { marginBottom: 0 }]}>
-          🏪
+          ShopApp
         </Text>
 
         <View style={[S.rowBetween, { gap: Spacing.sm }]}>
@@ -70,7 +75,7 @@ export default function Navbar({ search, setSearch }: Props) {
           </TouchableOpacity>
 
           {/* LOGIN BUTTON */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={S.btnChip}
             onPress={() => router.push("/screens/loginscreen")}
           >
@@ -89,6 +94,7 @@ export default function Navbar({ search, setSearch }: Props) {
       </View>
 
       {/* DROPDOWN MENU */}
+<<<<<<< HEAD
 {isOpen && (
   <View style={{ marginTop: Spacing.sm }}>
     
@@ -101,39 +107,53 @@ export default function Navbar({ search, setSearch }: Props) {
     >
       Products
     </Text>
+=======
+      {isOpen && (
+        <View style={{ marginTop: Spacing.sm }}>
+          
+          <Text
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/(tabs)/Products");
+            }}
+            style={[S.body, { paddingVertical: Spacing.sm }]}
+          >
+            Products
+          </Text>
+>>>>>>> 537fbc0789d099731389521596cfcde6a8b37210
 
-    <Text
-      onPress={() => {
-        setIsOpen(false);
-        router.push("/catalogue");
-      }}
-      style={[S.body, { paddingVertical: Spacing.sm }]}
-    >
-      Catalogue
-    </Text>
+          <Text
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/catalogue");
+            }}
+            style={[S.body, { paddingVertical: Spacing.sm }]}
+          >
+            Catalogue
+          </Text>
 
-    <Text
-      onPress={() => {
-        setIsOpen(false);
-        router.push("/wishlist");
-      }}
-      style={[S.body, { paddingVertical: Spacing.sm }]}
-    >
-      Wishlist
-    </Text>
+          <Text
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/wishlist");
+            }}
+            style={[S.body, { paddingVertical: Spacing.sm }]}
+          >
+            Wishlist
+          </Text>
 
-    <Text
-      onPress={() => {
-        setIsOpen(false);
-        router.push("/(tabs)/Profile");
-      }}
-      style={[S.body, { paddingVertical: Spacing.sm }]}
-    >
-      Profile
-    </Text>
+          <Text
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/(tabs)/Profile");
+            }}
+            style={[S.body, { paddingVertical: Spacing.sm }]}
+          >
+            Profile
+          </Text>
 
-  </View>
-)}
+        </View>
+      )}
     </View>
   );
 }
