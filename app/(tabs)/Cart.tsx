@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import {
   getCart,
@@ -9,6 +9,7 @@ import {
 import { useFocusEffect, router } from "expo-router";
 
 import S, { Spacing } from "@/app/styles/global";
+import Footer from "../components/Footer";
 
 export default function Cart() {
   const [cartProducts, setCartProducts] = useState([]);
@@ -16,7 +17,7 @@ export default function Cart() {
   useFocusEffect(
     useCallback(() => {
       loadCart();
-    }, [])
+    }, []),
   );
 
   async function loadCart() {
@@ -33,103 +34,137 @@ export default function Cart() {
     loadCart();
   }
 
-  // Calculate total price
   const totalPrice = cartProducts.reduce((total, product) => {
     return total + product.price * (product.count || 1);
   }, 0);
 
   if (cartProducts.length > 0) {
     return (
-      <View
-        style={[
-          S.screen,
-          {
-            justifyContent: "flex-start",
-            alignItems: "flex-start",
-            paddingTop: 20,
-          },
-        ]}
-      >
-        {/* Title */}
-        <Text
-          style={[
-            S.heading,
-            {
-              marginBottom: Spacing.lg,
-              textAlign: "left",
-              alignSelf: "flex-start",
-            },
-          ]}
+      <View style={[S.screen, { flex: 1 }]}>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 100,
+            backgroundColor: "#f6f7fb",
+            padding: 15,
+            paddingTop: 0,
+            borderBottomWidth: 1,
+            borderBottomColor: "#ffffff00",
+          }}
         >
-          Shopping Cart
-        </Text>
-
-        {/* Products */}
-        <View style={{ width: "100%" }}>
-          {cartProducts.map((product) => (
-            <View key={product.id} style={S.card}>
-              <Pressable onPress={() => handleRemove(product.id)}>
-                <Text style={S.btnDangerText}>Remove</Text>
-              </Pressable>
-
-              <Text style={S.subheading}>{product.name}</Text>
-
-              <Pressable
-                onPress={async () => {
-                  await increaseCount(product.id);
-                  loadCart();
-                }}
-              >
-                <Text>+</Text>
-              </Pressable>
-
-              <Text>Quantity: {product.count || 1}</Text>
-
-              <Pressable
-                onPress={async () => {
-                  await decreaseCount(product.id);
-                  loadCart();
-                }}
-              >
-                <Text>-</Text>
-              </Pressable>
-
-              <Text style={S.price}>
-                Price: $
-                {(product.price * (product.count || 1)).toFixed(2)}
-              </Text>
-            </View>
-          ))}
+          <Text
+            style={[
+              S.subheading,
+              {
+                marginTop: Spacing.lg,
+                textAlign: "center",
+              },
+            ]}
+          >
+            Total: ${totalPrice.toFixed(2)}
+          </Text>
+          <Pressable
+            style={S.btnPrimary}
+            onPress={() => router.push("/screens/checkout")}
+          >
+            <Text style={S.btnPrimaryText}>Go to Checkout</Text>
+          </Pressable>
         </View>
 
-        {/* Total Price */}
-        <Text
-          style={[
-            S.subheading,
-            {
-              marginTop: Spacing.lg,
-              marginBottom: Spacing.md,
-              alignSelf: "flex-start",
-            },
-          ]}
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: 80,
+            paddingBottom: 40,
+          }}
+          showsVerticalScrollIndicator={false}
         >
-          Total: ${totalPrice.toFixed(2)}
-        </Text>
+          <Text
+            style={[
+              S.heading,
+              {
+                marginBottom: Spacing.lg,
+                textAlign: "left",
+                alignSelf: "flex-start",
+              },
+            ]}
+          >
+            Shopping Cart
+          </Text>
 
-        {/* Checkout Button */}
-        <Pressable
-          style={[S.btnPrimary, { marginTop: Spacing.md }]}
-          onPress={() => router.push("/screens/checkout")}
-        >
-          <Text style={S.btnPrimaryText}>Go to Checkout</Text>
-        </Pressable>
+          <View style={{ width: "100%" }}>
+            {cartProducts.map((product) => (
+              <View key={product.id} style={S.card}>
+                <Pressable onPress={() => handleRemove(product.id)}>
+                  <Text style={S.btnDangerText}>Remove</Text>
+                </Pressable>
+
+                <Text style={S.subheading}>{product.name}</Text>
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    borderWidth: 1,
+                    borderColor: "#4f46e5",
+                    borderRadius: 30,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    marginVertical: 8,
+                    alignSelf: "flex-start",
+                    gap: 12,
+                  }}
+                >
+                  <Pressable
+                    onPress={async () => {
+                      await decreaseCount(product.id);
+                      loadCart();
+                    }}
+                    style={{
+                      paddingHorizontal: 10,
+                      paddingVertical: 2,
+                    }}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: "600" }}>−</Text>
+                  </Pressable>
+
+                  <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                    {product.count || 1}
+                  </Text>
+
+                  <Pressable
+                    onPress={async () => {
+                      await increaseCount(product.id);
+                      loadCart();
+                    }}
+                    style={{
+                      paddingHorizontal: 10,
+                      paddingVertical: 2,
+                    }}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: "600" }}>+</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={S.price}>
+                  Price: ${(product.price * (product.count || 1)).toFixed(2)}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={{ marginTop: 50 }}>
+            <Footer />
+          </View>
+        </ScrollView>
       </View>
     );
   }
 
   return (
-    <View style={[S.screen, { paddingTop: 20 }]}>
-      {/* Title in top left */}
+    <View style={[S.screen, { flex: 1 }]}>
       <Text
         style={[
           S.heading,
@@ -143,17 +178,17 @@ export default function Cart() {
         Shopping Cart
       </Text>
 
-      {/* Empty text centered */}
       <View
         style={{
           flex: 1,
-          width: "100%",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
         <Text style={S.emptyText}>Your cart is empty.</Text>
       </View>
+
+      <Footer />
     </View>
   );
 }
