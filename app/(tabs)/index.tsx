@@ -20,8 +20,6 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Navbar */}
-      <Navbar search={search} setSearch={setSearch} />
 
       <ScrollView
         style={S.screenNoPad}

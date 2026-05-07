@@ -131,7 +131,6 @@ export default function ProductsScreen() {
 
   return (
     <View style={S.screen}>
-      <Navbar search={search} setSearch={setSearch} />
 
       <View
         style={[
