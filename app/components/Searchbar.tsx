@@ -13,6 +13,8 @@ export default function Searchbar({ search, setSearch }: Props) {
       style={
         
         S.inputWrapper
+
+        
       }
     >
       <Ionicons name="search" size={20} color="gray" />

@@ -1,18 +1,15 @@
-import { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, Alert, ActivityIndicator, } from "react-native";
-import { getCart, saveCart } from "../storage/cartStorage";
-import S, { Colors, Spacing, Typography, Radius } from "@/app/styles/global";
+import { useState, useCallback } from "react";
+import { View, Text, TextInput, Pressable, ScrollView, Alert, ActivityIndicator, StatusBar } from "react-native";
+import { useFocusEffect } from "expo-router";
+import { getCart, saveCart } from "@/app/storage/cartStorage";
+import S, { Colors, Spacing, Typography } from "@/app/styles/global";
+import Navbar from "@/app/components/Navbar";
 
 type Product = {
 	id: string;
 	name: string;
 	price: number;
-};
-
-type Props = {
-	navigation: {
-		navigate: (screen: string) => void;
-	};
+	count?: number;
 };
 
 type ShippingForm = {
@@ -21,28 +18,38 @@ type ShippingForm = {
 	city: string;
 };
 
-export default function Checkout({ navigation }: Props) {
+export default function Checkout() {
 	const [cart, setCart] = useState<Product[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [placing, setPlacing] = useState<boolean>(false);
+	const [search, setSearch] = useState("");
 	const [form, setForm] = useState<ShippingForm>({
 		name: "",
 		address: "",
 		city: "",
 	});
 
-	useEffect(() => {
-		getCart()
-		.then((data: Product[]) => setCart(data))
-		.finally(() => setLoading(false));
-	}, []);
+	useFocusEffect(
+		useCallback(() => {
+			loadCart();
+		}, [])
+	);
+
+	async function loadCart() {
+		try {
+			const data: Product[] = await getCart();
+			setCart(data);
+		} finally {
+			setLoading(false);
+		}
+	}
 
 	function updateField(field: keyof ShippingForm, value: string): void {
 		setForm((prev) => ({ ...prev, [field]: value }));
 	}
 
 	const total: string = cart
-		.reduce((sum: number, p: Product) => sum + p.price, 0)
+		.reduce((sum: number, p: Product) => sum + p.price * (p.count || 1), 0)
 		.toFixed(2);
 
 	async function handlePlaceOrder(): Promise<void> {
@@ -53,7 +60,7 @@ export default function Checkout({ navigation }: Props) {
 		setPlacing(true);
 		await saveCart([]);
 		setPlacing(false);
-		navigation.navigate("OrderConfirmation");
+		Alert.alert("Order placed!", "Thank you for your purchase.");
 	}
 
 	if (loading) {
@@ -64,73 +71,106 @@ export default function Checkout({ navigation }: Props) {
 		);
 	}
 
-	if (cart.length === 0) {
-		return (
-			<View style={[S.screen, S.centered]}>
-				<Text style={S.emptyText}>Your cart is empty.</Text>
-			</View>
-		);
-	}
-
 	return (
-		<ScrollView
-			style={S.screenNoPad}
-			contentContainerStyle={{ padding: Spacing.lg, paddingBottom: 48 }}
-		>
-		<Text style={S.heading}>Checkout</Text>
-		<Text style={S.sectionTitle}>Order Summary</Text>
-		<View style={S.card}>
-			{cart.map((product: Product) => (
-				<View key={product.id} style={[S.rowBetween, { paddingVertical: Spacing.xs }]}>
-					<Text style={{ color: Colors.textPrimary, fontSize: Typography.md, flex: 1 }}>
-					{product.name}
-					</Text>
-					<Text style={S.price}>${product.price.toFixed(2)}</Text>
-				</View>
-			))}
+		<View style={[S.screenNoPad, { backgroundColor: Colors.bg }]}>
+			<StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
+			<Navbar search={search} setSearch={setSearch} />
 
-			<View style={{ height: 1, backgroundColor: Colors.border, marginVertical: Spacing.sm }} />
-
-			<View style={S.rowBetween}>
-				<Text style={{ color: Colors.textPrimary, fontSize: Typography.lg, fontWeight: Typography.bold }}>
-					Total
-				</Text>
-				<Text style={[S.price, { fontSize: Typography.lg }]}>${total}</Text>
-			</View>
-		</View>
-		<Text style={S.sectionTitle}>Shipping Info</Text>
-		<View style={S.card}>
-			{(["name", "address", "city"] as (keyof ShippingForm)[]).map((field, i, arr) => (
-				<View key={field} style={{ marginBottom: i < arr.length - 1 ? Spacing.sm : 0 }}>
-					<Text style={S.label}>{field}</Text>
-					<View style={S.inputWrapper}>
-					<TextInput
-						style={S.inputText}
-						placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-						placeholderTextColor={Colors.textMuted}
-						value={form[field]}
-						onChangeText={(v) => updateField(field, v)}
-					/>
-					</View>
+			{cart.length === 0 ? (
+				<View style={[S.screen, S.centered]}>
+					<Text style={S.emptyText}>Your cart is empty.</Text>
 				</View>
-			))}
-		</View>
-		<Pressable
-			style={({ pressed }) => [
-				S.btnPrimary,
-				{ marginTop: Spacing.xxl },
-				pressed && { opacity: 0.85 },
-				placing && S.btnDisabled,
-			]}
-			onPress={handlePlaceOrder}
-			disabled={placing}
-		>
-			{placing ? (
-				<ActivityIndicator color={Colors.accentDark} />
 			) : (
-				<Text style={S.btnPrimaryText}>Place Order</Text>
+				<ScrollView
+					contentContainerStyle={{ padding: Spacing.lg, paddingBottom: 48 }}
+					showsVerticalScrollIndicator={false}
+				>
+					<Text style={[S.heading, { marginBottom: Spacing.xl }]}>Checkout</Text>
+
+					<Text style={S.sectionTitle}>Order Summary</Text>
+					<View style={S.card}>
+						{cart.map((product: Product) => (
+							<View
+								key={product.id}
+								style={[S.rowBetween, { paddingVertical: Spacing.xs }]}
+							>
+								<Text
+									style={{
+										color: Colors.textPrimary,
+										fontSize: Typography.md,
+										flex: 1,
+									}}
+								>
+									{product.name}
+									{(product.count ?? 1) > 1 && (
+										<Text style={{ color: Colors.textDim }}>{" "}x{product.count}</Text>
+									)}
+								</Text>
+								<Text style={S.price}>${(product.price * (product.count || 1)).toFixed(2)}</Text>
+							</View>
+						))}
+						<View
+							style={{
+								height: 1,
+								backgroundColor: Colors.border,
+								marginVertical: Spacing.sm,
+							}}
+						/>
+						<View style={S.rowBetween}>
+							<Text
+								style={{
+									color: Colors.textPrimary,
+									fontSize: Typography.lg,
+									fontWeight: Typography.bold,
+								}}
+							>Total</Text>
+							<Text style={[S.price, { fontSize: Typography.lg }]}>${total}</Text>
+						</View>
+					</View>
+
+					<Text style={[S.sectionTitle, { marginTop: Spacing.xl }]}>Shipping Info</Text>
+					<View style={S.card}>
+						{(["name", "address", "city"] as (keyof ShippingForm)[]).map(
+							(field, i, arr) => (
+								<View
+									key={field}
+									style={{ marginBottom: i < arr.length - 1 ? Spacing.sm : 0 }}
+								>
+									<Text style={S.label}>{field}</Text>
+									<View style={S.inputWrapper}>
+										<TextInput
+											style={S.inputText}
+											placeholder={
+												field.charAt(0).toUpperCase() + field.slice(1)
+											}
+											placeholderTextColor={Colors.textMuted}
+											value={form[field]}
+											onChangeText={(v) => updateField(field, v)}
+										/>
+									</View>
+								</View>
+							)
+						)}
+					</View>
+
+					<Pressable
+						style={({ pressed }) => [
+							S.btnPrimary,
+							{ marginTop: Spacing.xxl },
+							pressed && { opacity: 0.85 },
+							placing && S.btnDisabled,
+						]}
+						onPress={handlePlaceOrder}
+						disabled={placing}
+					>
+						{placing ? (
+							<ActivityIndicator color={Colors.accentDark} />
+						) : (
+							<Text style={S.btnPrimaryText}>Place Order</Text>
+						)}
+					</Pressable>
+				</ScrollView>
 			)}
-		</Pressable>
-		</ScrollView>
+		</View>
 	);
 }
