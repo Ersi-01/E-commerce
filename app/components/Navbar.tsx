@@ -1,12 +1,10 @@
-import React, { useState, useCallback } from "react";
-import { useRouter } from "expo-router";
-import { View, Text, TouchableOpacity } from "react-native";
-import { useFocusEffect } from "expo-router";
-import { ShoppingCart, User, Menu, X } from "lucide-react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { Menu, ShoppingCart, User, X } from "lucide-react-native";
+import React, { useCallback, useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
-import { Colors, Spacing, Shadows } from "@/app/styles/global";
-import S from "@/app/styles/global";
 import { getCart } from "@/app/storage/cartStorage";
+import S, { Colors, Shadows, Spacing } from "@/app/styles/global";
 
 type Props = {
   search: string;
@@ -22,7 +20,7 @@ export default function Navbar({ search, setSearch }: Props) {
   useFocusEffect(
     useCallback(() => {
       loadCartCount();
-    }, [])
+    }, []),
   );
 
   async function loadCartCount() {
@@ -31,16 +29,18 @@ export default function Navbar({ search, setSearch }: Props) {
   }
 
   return (
-    <View style={[S.card, { padding: Spacing.sm, margin: Spacing.lg }, Shadows.card]}>
-      
+    <View
+      style={[
+        S.card,
+        { padding: Spacing.sm, margin: Spacing.lg },
+        Shadows.card,
+      ]}
+    >
       {/* TOP BAR */}
       <View style={S.rowBetween}>
-        <Text style={[S.subheading, { marginBottom: 0 }]}>
-          🏪
-        </Text>
+        <Text style={[S.subheading, { marginBottom: 0 }]}>🏪</Text>
 
         <View style={[S.rowBetween, { gap: Spacing.sm }]}>
-          
           {/* CART */}
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/Cart")}
@@ -53,7 +53,7 @@ export default function Navbar({ search, setSearch }: Props) {
                 <View
                   style={[
                     S.badge,
-                    { position: "absolute", top: -6, right: -8 }
+                    { position: "absolute", top: -6, right: -8 },
                   ]}
                 >
                   <Text style={S.badgeText}>{cartCount}</Text>
@@ -86,11 +86,9 @@ export default function Navbar({ search, setSearch }: Props) {
         </View>
       </View>
 
-      
       {/* DROPDOWN MENU */}
       {isOpen && (
         <View style={{ marginTop: Spacing.sm }}>
-          
           <Text
             onPress={() => {
               setIsOpen(false);
@@ -130,7 +128,6 @@ export default function Navbar({ search, setSearch }: Props) {
           >
             Profile
           </Text>
-
         </View>
       )}
     </View>
