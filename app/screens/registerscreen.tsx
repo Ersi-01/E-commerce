@@ -12,10 +12,10 @@ import {
   ActivityIndicator,
   StatusBar,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Typography } from '@/app/styles/global';
 import S from '@/app/styles/global';
+import storage from '@/app/utils/storage';
 
 type RegisterErrors = {
   name?: string | null;
@@ -92,7 +92,9 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      await AsyncStorage.setItem('@ecommerce_user', JSON.stringify({ name, email }));
+      const userData = { name, email, password }
+      await storage.set('@ecommerce_user', JSON.stringify(userData))
+      await storage.set('@ecommerce_session', JSON.stringify(userData))
       router.replace('/(tabs)');
     } catch (e) {
       console.log('Register error', e);
