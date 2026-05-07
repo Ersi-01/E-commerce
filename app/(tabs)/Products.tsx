@@ -66,7 +66,7 @@ export default function ProductsScreen() {
   const renderItem = ({ item }: { item: Product }) => (
     <TouchableOpacity
       onPress={() =>
-        router.push({ pathname: "/productdetails", params: { id: item.id } })
+        router.push({ pathname: "/screens/productdetails", params: { id: item.id } })
       }
     >
       <View style={S.card}>
