@@ -1,7 +1,9 @@
-import { useFocusEffect, useRouter } from "expo-router";
-import { Menu, ShoppingCart, User, X } from "lucide-react-native";
-import React, { useCallback, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Hamburger } from "lucide-react-native";
+import React, { useState, useCallback } from "react";
+import { useRouter } from "expo-router";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useFocusEffect } from "expo-router";
+import { ShoppingCart, User, Menu, X } from "lucide-react-native";
 
 import { getCart } from "@/app/storage/cartStorage";
 import S, { Colors, Shadows, Spacing } from "@/app/styles/global";
@@ -38,7 +40,9 @@ export default function Navbar({ search, setSearch }: Props) {
     >
       {/* TOP BAR */}
       <View style={S.rowBetween}>
-        <Text style={[S.subheading, { marginBottom: 0 }]}>🏪</Text>
+        <TouchableOpacity>
+          <Hamburger />
+        </TouchableOpacity>
 
         <View style={[S.rowBetween, { gap: Spacing.sm }]}>
           {/* CART */}
@@ -65,14 +69,6 @@ export default function Navbar({ search, setSearch }: Props) {
           {/* USER */}
           <TouchableOpacity onPress={() => router.push("/(tabs)/Profile")}>
             <User color={Colors.textPrimary} size={22} />
-          </TouchableOpacity>
-
-          {/* LOGIN BUTTON */}
-          <TouchableOpacity
-            style={S.btnChip}
-            onPress={() => router.push("/screens/loginscreen")}
-          >
-            <Text style={S.btnChipText}>Sign In</Text>
           </TouchableOpacity>
 
           {/* MENU */}
