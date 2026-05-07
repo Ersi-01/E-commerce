@@ -127,7 +127,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           ]}
         >
           <View style={styles.header}>
-            <Text style={styles.brandName}>ShopWave</Text>
+            <Text style={styles.brandName}>ShopApp</Text>
             <Text style={S.caption}>Sign in to continue</Text>
           </View>
 
