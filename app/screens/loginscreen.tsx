@@ -12,10 +12,10 @@ import {
   ActivityIndicator,
   StatusBar,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Typography } from '@/app/styles/global';
 import S from '@/app/styles/global';
+import storage from '@/app/utils/storage';
 
 type LoginErrors = {
   email?: string | null;
@@ -24,6 +24,7 @@ type LoginErrors = {
 
 export default function LoginScreen() {
   const router = useRouter();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -33,51 +34,86 @@ export default function LoginScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
+
   const passwordRef = useRef<TextInput>(null);
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 10, useNativeDriver: true }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 60,
+        friction: 10,
+        useNativeDriver: true,
+      }),
     ]).start();
 
     checkExistingUser();
   }, []);
 
   const checkExistingUser = async () => {
-  try {
-    const saved = await AsyncStorage.getItem('@ecommerce_user');
-    if (saved) {
-      router.replace('/(tabs)' as any);
+    try {
+      const saved = await storage.get('@ecommerce_session');
+
+      if (saved) {
+        router.replace('/(tabs)' as any);
+      }
+    } catch (e) {
+      console.log('Storage error', e);
     }
-  } catch (e) {
-    console.log('Storage error', e);
-  }
-};
+  };
 
   const triggerShake = () => {
     Animated.sequence([
-      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
-      Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, {
+        toValue: 10,
+        duration: 60,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: -10,
+        duration: 60,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 8,
+        duration: 60,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: -8,
+        duration: 60,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 0,
+        duration: 60,
+        useNativeDriver: true,
+      }),
     ]).start();
   };
 
   const validate = () => {
     const newErrors: LoginErrors = {};
+
     if (!email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Enter a valid email';
     }
+
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
+
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -88,24 +124,43 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
+
     try {
-      const saved = await AsyncStorage.getItem('@ecommerce_user');
+      const saved = await storage.get('@ecommerce_user');
 
       if (!saved) {
-        setErrors({ email: 'No account found. Please register first.' });
+        setErrors({
+          email: 'No account found. Please register first.',
+        });
+
         triggerShake();
-        setLoading(false);
         return;
       }
 
       const user = JSON.parse(saved);
 
       if (user.email !== email) {
-        setErrors({ email: 'Email does not match our records.' });
+        setErrors({
+          email: 'Email does not match our records.',
+        });
+
         triggerShake();
-        setLoading(false);
         return;
       }
+
+      if (user.password !== password) {
+        setErrors({
+          password: 'Incorrect password.',
+        });
+
+        triggerShake();
+        return;
+      }
+
+      await storage.set(
+        '@ecommerce_session',
+        JSON.stringify(user)
+      );
 
       router.replace('/(tabs)');
     } catch (e) {
@@ -120,9 +175,15 @@ export default function LoginScreen() {
       style={S.screenNoPad}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={Colors.bg}
+      />
 
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={S.blobTop} />
         <View style={S.blobBottom} />
 
@@ -131,7 +192,10 @@ export default function LoginScreen() {
             styles.container,
             {
               opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }, { translateX: shakeAnim }],
+              transform: [
+                { translateY: slideAnim },
+                { translateX: shakeAnim },
+              ],
             },
           ]}
         >
@@ -141,70 +205,128 @@ export default function LoginScreen() {
           </View>
 
           <View style={S.cardElevated}>
-
             <View style={styles.fieldGroup}>
               <Text style={S.label}>Email</Text>
+
               <TextInput
-                style={[styles.input, errors.email ? S.inputError : null, { outlineStyle: 'none' } as any]}
+                style={[
+                  styles.input,
+                  errors.email ? S.inputError : null,
+                  { outlineStyle: 'none' } as any,
+                ]}
                 placeholder="you@example.com"
                 placeholderTextColor={Colors.textMuted}
                 value={email}
-                onChangeText={t => { setEmail(t); setErrors(e => ({ ...e, email: null })); }}
+                onChangeText={(t) => {
+                  setEmail(t);
+                  setErrors((e) => ({
+                    ...e,
+                    email: null,
+                  }));
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="next"
-                onSubmitEditing={() => passwordRef.current?.focus()}
+                onSubmitEditing={() =>
+                  passwordRef.current?.focus()
+                }
               />
-              {errors.email && <Text style={S.fieldError}>{errors.email}</Text>}
+
+              {errors.email && (
+                <Text style={S.fieldError}>
+                  {errors.email}
+                </Text>
+              )}
             </View>
 
             <View style={styles.fieldGroup}>
               <Text style={S.label}>Password</Text>
-              <View style={[S.inputWrapper, errors.password ? S.inputError : null]}>
+
+              <View
+                style={[
+                  S.inputWrapper,
+                  errors.password ? S.inputError : null,
+                ]}
+              >
                 <TextInput
                   ref={passwordRef}
-                  style={[S.inputText, { outlineStyle: 'none' } as any]}
+                  style={[
+                    S.inputText,
+                    { outlineStyle: 'none' } as any,
+                  ]}
                   placeholder="Min. 6 characters"
                   placeholderTextColor={Colors.textMuted}
                   value={password}
-                  onChangeText={t => { setPassword(t); setErrors(e => ({ ...e, password: null })); }}
+                  onChangeText={(t) => {
+                    setPassword(t);
+                    setErrors((e) => ({
+                      ...e,
+                      password: null,
+                    }));
+                  }}
                   secureTextEntry={!showPassword}
                   returnKeyType="done"
                   onSubmitEditing={handleLogin}
                 />
+
                 <TouchableOpacity
-                  onPress={() => setShowPassword(v => !v)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  onPress={() =>
+                    setShowPassword((v) => !v)
+                  }
+                  hitSlop={{
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10,
+                  }}
                 >
-                  <Text style={styles.showHideText}>{showPassword ? 'HIDE' : 'SHOW'}</Text>
+                  <Text style={styles.showHideText}>
+                    {showPassword ? 'HIDE' : 'SHOW'}
+                  </Text>
                 </TouchableOpacity>
               </View>
-              {errors.password && <Text style={S.fieldError}>{errors.password}</Text>}
+
+              {errors.password && (
+                <Text style={S.fieldError}>
+                  {errors.password}
+                </Text>
+              )}
             </View>
 
             <TouchableOpacity
-              style={[S.btnPrimary, loading && S.btnDisabled]}
+              style={[
+                S.btnPrimary,
+                loading && S.btnDisabled,
+              ]}
               onPress={handleLogin}
               disabled={loading}
               activeOpacity={0.85}
             >
-              {loading
-                ? <ActivityIndicator color={Colors.accentDark} />
-                : <Text style={S.btnPrimaryText}>Sign In</Text>
-              }
+              {loading ? (
+                <ActivityIndicator
+                  color={Colors.accentDark}
+                />
+              ) : (
+                <Text style={S.btnPrimaryText}>
+                  Sign In
+                </Text>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.signupRow}
-              onPress={() => router.push('/register' as any)}
+              onPress={() =>
+                router.push('/register' as any)
+              }
             >
               <Text style={S.caption}>
                 Don't have an account?{' '}
-                <Text style={styles.signupLink}>Create one</Text>
+                <Text style={styles.signupLink}>
+                  Create one
+                </Text>
               </Text>
             </TouchableOpacity>
-
           </View>
         </Animated.View>
       </ScrollView>
@@ -218,12 +340,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: Spacing.xl * 2,
   },
+
   container: {
     paddingHorizontal: Spacing.xxl,
   },
+
   header: {
     marginBottom: Spacing.xxxl,
   },
+
   brandName: {
     fontSize: Typography.h1,
     fontWeight: Typography.extrabold,
@@ -231,9 +356,11 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
     marginBottom: Spacing.xs,
   },
+
   fieldGroup: {
     marginBottom: Spacing.lg,
   },
+
   input: {
     backgroundColor: Colors.input,
     borderRadius: Radius.lg,
@@ -244,16 +371,19 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     fontSize: Typography.md,
   },
+
   showHideText: {
     color: Colors.accent,
     fontSize: Typography.xs,
     fontWeight: Typography.bold,
     letterSpacing: 0.8,
   },
+
   signupRow: {
     alignItems: 'center',
     marginTop: Spacing.xl,
   },
+
   signupLink: {
     color: Colors.accent,
     fontWeight: Typography.bold,

@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage"
 import {
   Camera,
   CreditCard,
@@ -27,6 +26,7 @@ import { useRouter } from "expo-router"
 import Navbar from "@/app/components/Navbar"
 import { useWishlist } from "../context/WishlistContext"
 import S, { Colors, Radius, Spacing, Typography } from "@/app/styles/global"
+import storage from "@/app/utils/storage"
 
 export default function Profile() {
   const router = useRouter()
@@ -46,24 +46,23 @@ export default function Profile() {
 
   const loadProfile = async () => {
     try {
-      const savedUser = await AsyncStorage.getItem("@ecommerce_user")
+      const savedUser = await storage.get("@ecommerce_session")
 
       if (savedUser) {
         const user = JSON.parse(savedUser)
-
         if (user.email) setEmail(user.email)
         if (user.name) setName(user.name)
       }
 
-      const savedBalance = await AsyncStorage.getItem("@user_balance")
+      const savedBalance = await storage.get("@user_balance")
 
       if (savedBalance) {
         setBalance(Number(savedBalance))
       } else {
-        await AsyncStorage.setItem("@user_balance", "0")
+        await storage.set("@user_balance", "0")
       }
 
-      const savedOrders = await AsyncStorage.getItem("@user_orders")
+      const savedOrders = await storage.get("@user_orders")
 
       if (savedOrders) {
         setOrders(JSON.parse(savedOrders))
@@ -75,7 +74,6 @@ export default function Profile() {
 
   const displayName = useMemo(() => {
     if (name) return name
-
     return (
       email
         .split("@")[0]
@@ -106,20 +104,15 @@ export default function Profile() {
     }
 
     const updated = balance + amount
-
     setBalance(updated)
-
-    await AsyncStorage.setItem("@user_balance", String(updated))
-
+    await storage.set("@user_balance", String(updated))
     setTopupVisible(false)
     setTopupAmount("")
-
     Alert.alert("Success", `Balance updated: EUR ${updated.toFixed(2)}`)
   }
 
   const handleSignOut = async () => {
-    await AsyncStorage.removeItem("@ecommerce_user")
-
+    await storage.remove("@ecommerce_session")
     router.replace("/login" as any)
   }
 
@@ -143,7 +136,6 @@ export default function Profile() {
           paddingBottom: 160,
         }}
       >
-        {/* HEADER */}
         <View
           style={[
             S.screenHeader,
@@ -174,7 +166,6 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
 
-        {/* PROFILE CARD */}
         <View
           style={[
             S.cardElevated,
@@ -231,17 +222,7 @@ export default function Profile() {
 
           <View style={{ flex: 1 }}>
             <Text style={S.subheading}>{displayName}</Text>
-
-            <Text
-              style={[
-                S.caption,
-                {
-                  marginTop: 4,
-                },
-              ]}
-            >
-              {email}
-            </Text>
+            <Text style={[S.caption, { marginTop: 4 }]}>{email}</Text>
 
             <View
               style={{
@@ -257,7 +238,6 @@ export default function Profile() {
               }}
             >
               <Star size={12} color={Colors.accent} fill={Colors.accent} />
-
               <Text
                 style={{
                   color: Colors.accent,
@@ -271,7 +251,6 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* BALANCE */}
         <View
           style={{
             backgroundColor: Colors.accent,
@@ -320,19 +299,12 @@ export default function Profile() {
             }}
           >
             <CreditCard size={16} color="#111" />
-
-            <Text
-              style={{
-                color: "#111",
-                fontWeight: "800",
-              }}
-            >
+            <Text style={{ color: "#111", fontWeight: "800" }}>
               Top up
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* STATS */}
         <View
           style={{
             flexDirection: "row",
@@ -340,177 +312,13 @@ export default function Profile() {
             marginBottom: Spacing.xl,
           }}
         >
-          <StatCard
-            icon={ShoppingBag}
-            label="Purchases"
-            value={String(orders.length)}
-          />
-
-          <StatCard
-            icon={PackageCheck}
-            label="Delivered"
-            value={String(deliveredCount)}
-          />
-
-          <StatCard
-            icon={Heart}
-            label="Wishlist"
-            value={String(wishlist.length)}
-          />
+          <StatCard icon={ShoppingBag} label="Purchases" value={String(orders.length)} />
+          <StatCard icon={PackageCheck} label="Delivered" value={String(deliveredCount)} />
+          <StatCard icon={Heart} label="Wishlist" value={String(wishlist.length)} />
         </View>
 
-        {/* QUICK ACTIONS */}
-        <View
-          style={{
-            marginBottom: Spacing.xl,
-          }}
-        >
-          <Text
-            style={[
-              S.subheading,
-              {
-                marginBottom: Spacing.md,
-              },
-            ]}
-          >
-            Quick actions
-          </Text>
-
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              gap: Spacing.sm,
-            }}
-          >
-            <ActionCard icon={ShoppingBag} label="Orders" />
-
-            <ActionCard
-              icon={Wallet}
-              label="Wallet"
-              onPress={() => setTopupVisible(true)}
-            />
-
-            <ActionCard icon={MapPin} label="Address" />
-
-            <ActionCard
-              icon={Heart}
-              label="Wishlist"
-              onPress={() => router.push("/wishlist" as any)}
-            />
-          </View>
-        </View>
-
-        {/* RECENT PURCHASES */}
-        <View
-          style={{
-            marginBottom: Spacing.xl,
-          }}
-        >
-          <Text
-            style={[
-              S.subheading,
-              {
-                marginBottom: Spacing.md,
-              },
-            ]}
-          >
-            Recent purchases
-          </Text>
-
-          {orders.length === 0 ? (
-            <View
-              style={{
-                backgroundColor: Colors.card,
-                borderRadius: Radius.lg,
-                borderWidth: 1,
-                borderColor: Colors.border,
-                padding: Spacing.lg,
-              }}
-            >
-              <Text
-                style={{
-                  color: Colors.textDim,
-                  textAlign: "center",
-                }}
-              >
-                No purchases yet
-              </Text>
-            </View>
-          ) : (
-            orders.map((item, index) => (
-              <View
-                key={index}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  backgroundColor: Colors.card,
-                  borderRadius: Radius.lg,
-                  borderWidth: 1,
-                  borderColor: Colors.border,
-                  padding: Spacing.md,
-                  marginBottom: Spacing.sm,
-                }}
-              >
-                <View
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: Radius.md,
-                    backgroundColor: Colors.input,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: Spacing.md,
-                  }}
-                >
-                  <ShoppingBag size={18} color={Colors.accent} />
-                </View>
-
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      color: Colors.textPrimary,
-                      fontWeight: "700",
-                      fontSize: Typography.base,
-                    }}
-                  >
-                    {item.title}
-                  </Text>
-
-                  <Text
-                    style={{
-                      color: Colors.textDim,
-                      fontSize: Typography.sm,
-                      marginTop: 4,
-                    }}
-                  >
-                    {item.status}
-                  </Text>
-                </View>
-
-                <Text
-                  style={{
-                    color: Colors.accent,
-                    fontWeight: "800",
-                  }}
-                >
-                  EUR {item.price}
-                </Text>
-              </View>
-            ))
-          )}
-        </View>
-
-        {/* ACCOUNT */}
         <View>
-          <Text
-            style={[
-              S.subheading,
-              {
-                marginBottom: Spacing.md,
-              },
-            ]}
-          >
+          <Text style={[S.subheading, { marginBottom: Spacing.md }]}>
             Account
           </Text>
 
@@ -524,12 +332,14 @@ export default function Profile() {
         </View>
       </ScrollView>
 
+
       {/* NAVBAR */}
       
 
       {/* TOPUP MODAL */}
+
       <Modal visible={topupVisible} transparent animationType="fade">
-        <View
+        <View 
           style={{
             flex: 1,
             backgroundColor: "rgba(0,0,0,0.5)",
@@ -580,27 +390,16 @@ export default function Profile() {
                 marginBottom: 10,
               }}
             >
-              <Text
-                style={{
-                  color: "#fff",
-                  fontWeight: "800",
-                }}
-              >
+              <Text style={{ color: "#fff", fontWeight: "800" }}>
                 Add balance
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setTopupVisible(false)}
-              style={{
-                alignItems: "center",
-              }}
+              style={{ alignItems: "center" }}
             >
-              <Text
-                style={{
-                  color: Colors.textMuted,
-                }}
-              >
+              <Text style={{ color: Colors.textMuted }}>
                 Cancel
               </Text>
             </TouchableOpacity>
@@ -610,8 +409,6 @@ export default function Profile() {
     </View>
   )
 }
-
-/* ---------------- STAT CARD ---------------- */
 
 function StatCard({
   icon: Icon,
@@ -636,81 +433,15 @@ function StatCard({
       }}
     >
       <Icon size={20} color={Colors.accent} />
-
-      <Text
-        style={{
-          color: Colors.textPrimary,
-          fontSize: 22,
-          fontWeight: "900",
-        }}
-      >
+      <Text style={{ color: Colors.textPrimary, fontSize: 22, fontWeight: "900" }}>
         {value}
       </Text>
-
-      <Text
-        style={{
-          color: Colors.textDim,
-          fontSize: Typography.xs,
-          fontWeight: "700",
-        }}
-      >
+      <Text style={{ color: Colors.textDim, fontSize: Typography.xs, fontWeight: "700" }}>
         {label}
       </Text>
     </View>
   )
 }
-
-/* ---------------- ACTION CARD ---------------- */
-
-function ActionCard({
-  icon: Icon,
-  label,
-  onPress,
-}: {
-  icon: React.ElementType
-  label: string
-  onPress?: () => void
-}) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={{
-        width: "48%",
-        minHeight: 88,
-        backgroundColor: Colors.card,
-        borderRadius: Radius.lg,
-        borderWidth: 1,
-        borderColor: Colors.border,
-        padding: Spacing.md,
-        justifyContent: "space-between",
-      }}
-    >
-      <View
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: Radius.md,
-          backgroundColor: Colors.input,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Icon size={20} color={Colors.accent} />
-      </View>
-
-      <Text
-        style={{
-          color: Colors.textPrimary,
-          fontWeight: "700",
-        }}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  )
-}
-
-/* ---------------- MENU ROW ---------------- */
 
 function MenuRow({
   icon: Icon,
@@ -775,14 +506,7 @@ function MenuRow({
         </Text>
       </View>
 
-      <Text
-        style={{
-          color: Colors.textMuted,
-          fontSize: 28,
-        }}
-      >
-        ›
-      </Text>
+      <Text style={{ color: Colors.textMuted, fontSize: 28 }}>›</Text>
     </TouchableOpacity>
   )
-}
+} 
