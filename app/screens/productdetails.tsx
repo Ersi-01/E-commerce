@@ -29,7 +29,7 @@ export default function ProductDetails() {
 
   function goToProduct(productId: number) {
     router.push({
-      pathname: "/productdetails",
+      pathname: "screens/productdetails",
       params: { id: productId },
     });
   }
