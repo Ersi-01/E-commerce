@@ -33,7 +33,7 @@ export default function Navbar({ search, setSearch }: Props) {
   }
 
   return (
-    <View style={[S.card, { padding: Spacing.sm }, Shadows.card]}>
+    <View style={[S.card, { padding: Spacing.sm, marginTop: 30 }, Shadows.card]}>
 
       {/* TOP BAR */}
       <View style={S.rowBetween}>
@@ -95,7 +95,7 @@ export default function Navbar({ search, setSearch }: Props) {
     <Text
       onPress={() => {
         setIsOpen(false);
-        router.push("/(tabs)/Products");
+        router.push("/screens/Products");
       }}
       style={[S.body, { paddingVertical: Spacing.sm }]}
     >

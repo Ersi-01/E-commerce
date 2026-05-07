@@ -63,7 +63,7 @@ export default function Cart() {
 
         <Pressable
           style={[S.btnPrimary, { marginTop: Spacing.lg }]}
-          onPress={() => router.push("/checkout")}
+          onPress={() => router.push("/screens/checkout")}
         >
           <Text style={S.btnPrimaryText}>Go to Checkout</Text>
         </Pressable>
