@@ -59,7 +59,7 @@ export default function HomeScreen() {
     
       <View style={[S.card, styles.statsRow]}>
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>120+</Text>
+          <Text style={styles.statNumber}>50+</Text>
           <Text style={S.caption}>Products</Text>
         </View>
         <View style={styles.statDivider} />
@@ -82,11 +82,11 @@ export default function HomeScreen() {
       <View style={S.rowWrap}>
         <TouchableOpacity
           style={[S.card, styles.navCard]}
-          onPress={() => router.push("/(tabs)/catalogue")}
+          onPress={() => router.push("/(tabs)/Products")}
           activeOpacity={0.75}
         >
           <Text style={styles.navIcon}>🛍️</Text>
-          <Text style={S.subheading}>Catalogue</Text>
+          <Text style={S.subheading}>Products</Text>
           <Text style={S.caption}>Browse all products</Text>
           <Text style={styles.navArrow}>→</Text>
         </TouchableOpacity>

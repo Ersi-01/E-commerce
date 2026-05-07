@@ -22,7 +22,7 @@ export default function Wishlist() {
       <Text style={S.heading}>❤️ Wishlist ({wishlist.length})</Text>
 
       {wishlist.length === 0 ? (
-        <Text style={S.emptyText}>Wishlist juaj është bosh</Text>
+        <Text style={S.emptyText}>Wishlist is empty</Text>
       ) : (
         <FlatList
           data={wishlist}
