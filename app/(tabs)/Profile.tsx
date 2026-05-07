@@ -525,7 +525,6 @@ export default function Profile() {
       </ScrollView>
 
       {/* NAVBAR */}
-      <Navbar />
       
 
       {/* TOPUP MODAL */}
