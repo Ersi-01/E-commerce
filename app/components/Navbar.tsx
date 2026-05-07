@@ -40,7 +40,7 @@ export default function Navbar({ search, setSearch }: Props) {
     >
       {/* TOP BAR */}
       <View style={S.rowBetween}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/(tabs)/")}>
           <Hamburger />
         </TouchableOpacity>
 

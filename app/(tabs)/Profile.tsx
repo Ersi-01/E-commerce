@@ -1,6 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import {
-  Bell,
   Camera,
   CreditCard,
   Heart,
@@ -8,94 +7,152 @@ import {
   MapPin,
   PackageCheck,
   Settings,
-  ShieldCheck,
   ShoppingBag,
   Star,
-  User,
   Wallet,
-} from "lucide-react-native";
-import React, { useEffect, useMemo, useState } from "react";
+} from "lucide-react-native"
+import React, { useEffect, useMemo, useState } from "react"
 import {
+  Alert,
+  Modal,
   ScrollView,
   StatusBar,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
+} from "react-native"
+import { useRouter } from "expo-router"
 
-import { useWishlist } from "../context/WishlistContext";
-import S, { Colors, Spacing, Radius, Typography } from "@/app/styles/global";
-
-const STORAGE_KEYS = {
-  USER_TOKEN: "@ecommerce_user_token",
-  USER_EMAIL: "@ecommerce_user_email",
-};
-
-const recentPurchases = [
-  { id: "1", title: "Wireless Headphones", date: "12 Apr", price: "EUR 89.90", status: "Delivered" },
-  { id: "2", title: "Smart Watch", date: "04 Apr", price: "EUR 129.00", status: "In transit" },
-  { id: "3", title: "Running Shoes", date: "26 Mar", price: "EUR 74.50", status: "Delivered" },
-];
-
-const quickActions = [
-  { id: "orders", label: "Orders", icon: ShoppingBag },
-  { id: "wallet", label: "Wallet", icon: Wallet },
-  { id: "address", label: "Address", icon: MapPin },
-  { id: "security", label: "Security", icon: ShieldCheck },
-];
+import Navbar from "@/app/components/Navbar"
+import { useWishlist } from "../context/WishlistContext"
+import S, { Colors, Radius, Spacing, Typography } from "@/app/styles/global"
 
 export default function Profile() {
-  const { wishlist } = useWishlist();
-  const [email, setEmail] = useState("user@store.com");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter()
+  const { wishlist } = useWishlist()
+
+  const [email, setEmail] = useState("user@store.com")
+  const [name, setName] = useState("")
+  const [balance, setBalance] = useState(0)
+  const [orders, setOrders] = useState<any[]>([])
+
+  const [topupVisible, setTopupVisible] = useState(false)
+  const [topupAmount, setTopupAmount] = useState("")
 
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const [savedEmail, token] = await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEYS.USER_EMAIL),
-          AsyncStorage.getItem(STORAGE_KEYS.USER_TOKEN),
-        ]);
+    loadProfile()
+  }, [])
 
-        if (savedEmail) setEmail(savedEmail);
-        setIsLoggedIn(Boolean(token));
-      } catch (error) {
-        console.log("Failed to load profile data", error);
+  const loadProfile = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem("@ecommerce_user")
+
+      if (savedUser) {
+        const user = JSON.parse(savedUser)
+
+        if (user.email) setEmail(user.email)
+        if (user.name) setName(user.name)
       }
-    };
 
-    loadProfile();
-  }, []);
+      const savedBalance = await AsyncStorage.getItem("@user_balance")
+
+      if (savedBalance) {
+        setBalance(Number(savedBalance))
+      } else {
+        await AsyncStorage.setItem("@user_balance", "0")
+      }
+
+      const savedOrders = await AsyncStorage.getItem("@user_orders")
+
+      if (savedOrders) {
+        setOrders(JSON.parse(savedOrders))
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
   const displayName = useMemo(() => {
-    const name = email.split("@")[0]?.replace(/[._-]/g, " ") || "ShopWave User";
-    return name
-      .split(" ")
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
-  }, [email]);
+    if (name) return name
+
+    return (
+      email
+        .split("@")[0]
+        ?.replace(/[._-]/g, " ")
+        ?.replace(/\b\w/g, (l) => l.toUpperCase()) || "User"
+    )
+  }, [email, name])
 
   const initials = useMemo(() => {
     return displayName
       .split(" ")
-      .map((part) => part[0])
+      .map((x) => x[0])
       .join("")
       .slice(0, 2)
-      .toUpperCase();
-  }, [displayName]);
+      .toUpperCase()
+  }, [displayName])
+
+  const deliveredCount = useMemo(() => {
+    return orders.filter((x) => x.status?.toLowerCase() === "delivered").length
+  }, [orders])
+
+  const handleTopup = async () => {
+    const amount = Number(topupAmount)
+
+    if (!amount || amount <= 0) {
+      Alert.alert("Error", "Invalid amount")
+      return
+    }
+
+    const updated = balance + amount
+
+    setBalance(updated)
+
+    await AsyncStorage.setItem("@user_balance", String(updated))
+
+    setTopupVisible(false)
+    setTopupAmount("")
+
+    Alert.alert("Success", `Balance updated: EUR ${updated.toFixed(2)}`)
+  }
+
+  const handleSignOut = async () => {
+    await AsyncStorage.removeItem("@ecommerce_user")
+
+    router.replace("/login" as any)
+  }
 
   return (
-    <View style={[S.screenNoPad, { backgroundColor: Colors.bg }]}>
+    <View
+      style={[
+        S.screenNoPad,
+        {
+          backgroundColor: Colors.bg,
+          flex: 1,
+        },
+      ]}
+    >
       <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
 
-      <ScrollView 
-        contentContainerStyle={{ padding: 16, paddingTop: 54, paddingBottom: 28 }} 
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        scrollEnabled={true}
+        contentContainerStyle={{
+          padding: 16,
+          paddingTop: 54,
+          paddingBottom: 160,
+        }}
       >
-        {/* Header */}
-        <View style={[S.screenHeader, { justifyContent: "space-between", marginBottom: Spacing.xl }]}>
+        {/* HEADER */}
+        <View
+          style={[
+            S.screenHeader,
+            {
+              justifyContent: "space-between",
+              marginBottom: Spacing.xl,
+            },
+          ]}
+        >
           <View>
             <Text style={S.label}>My account</Text>
             <Text style={S.heading}>Profile</Text>
@@ -112,25 +169,28 @@ export default function Profile() {
               alignItems: "center",
               justifyContent: "center",
             }}
-            activeOpacity={0.8}
           >
-            <Settings size={21} color={Colors.textPrimary} />
+            <Settings size={20} color={Colors.textPrimary} />
           </TouchableOpacity>
         </View>
 
-        {/* Profile Card */}
+        {/* PROFILE CARD */}
         <View
           style={[
             S.cardElevated,
             {
               flexDirection: "row",
               alignItems: "center",
-              marginBottom: Spacing.md,
+              marginBottom: Spacing.lg,
             },
           ]}
         >
-          {/* Avatar */}
-          <View style={{ marginRight: Spacing.lg, position: "relative" }}>
+          <View
+            style={{
+              position: "relative",
+              marginRight: Spacing.lg,
+            }}
+          >
             <View
               style={{
                 width: 78,
@@ -143,7 +203,7 @@ export default function Profile() {
             >
               <Text
                 style={{
-                  color: Colors.bg,
+                  color: "#fff",
                   fontSize: 26,
                   fontWeight: "900",
                 }}
@@ -151,11 +211,12 @@ export default function Profile() {
                 {initials}
               </Text>
             </View>
+
             <TouchableOpacity
               style={{
                 position: "absolute",
-                right: -5,
-                bottom: -5,
+                right: -4,
+                bottom: -4,
                 width: 30,
                 height: 30,
                 borderRadius: Radius.md,
@@ -163,220 +224,403 @@ export default function Profile() {
                 alignItems: "center",
                 justifyContent: "center",
               }}
-              activeOpacity={0.8}
             >
-              <Camera size={15} color={"#141111"} />
+              <Camera size={15} color="#111" />
             </TouchableOpacity>
           </View>
 
-          {/* Profile Info */}
           <View style={{ flex: 1 }}>
             <Text style={S.subheading}>{displayName}</Text>
-            <Text style={[S.caption, { marginTop: Spacing.xs }]}>{email}</Text>
 
-            {/* Member Badge */}
+            <Text
+              style={[
+                S.caption,
+                {
+                  marginTop: 4,
+                },
+              ]}
+            >
+              {email}
+            </Text>
+
             <View
               style={{
                 alignSelf: "flex-start",
                 flexDirection: "row",
                 alignItems: "center",
-                gap: Spacing.xs,
-                marginTop: Spacing.sm,
-                paddingHorizontal: Spacing.md,
-                paddingVertical: Spacing.xs + 2,
+                gap: 6,
+                marginTop: 12,
+                backgroundColor: Colors.accent + "18",
                 borderRadius: 999,
-                backgroundColor: Colors.accent + "15",
-                borderWidth: 1,
-                borderColor: Colors.accent + "44",
+                paddingHorizontal: 12,
+                paddingVertical: 6,
               }}
             >
-              <Star size={13} color={Colors.accent} fill={Colors.accent} />
-              <Text style={{ color: Colors.accent, fontSize: Typography.xs, fontWeight: "700" }}>
+              <Star size={12} color={Colors.accent} fill={Colors.accent} />
+
+              <Text
+                style={{
+                  color: Colors.accent,
+                  fontWeight: "700",
+                  fontSize: Typography.xs,
+                }}
+              >
                 Gold member
               </Text>
             </View>
           </View>
         </View>
 
-        {!isLoggedIn && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: Spacing.md,
-              backgroundColor: Colors.accent + "14",
-              borderColor: Colors.accent + "33",
-              borderWidth: 1,
-              borderRadius: Radius.lg,
-              padding: Spacing.md,
-              marginBottom: Spacing.md,
-            }}
-          >
-            <User size={18} color={Colors.accent} />
-            <Text style={{ flex: 1, color: Colors.accent + "cc", fontSize: Typography.sm, lineHeight: 17 }}>
-              Template profile. After login, this screen can use real user data.
-            </Text>
-          </View>
-        )}
-
-        {/* Balance Card */}
+        {/* BALANCE */}
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
             backgroundColor: Colors.accent,
             borderRadius: Radius.xxl,
             padding: Spacing.xl,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
             marginBottom: Spacing.xl,
           }}
         >
           <View>
-            <Text style={{ color: Colors.textPrimary + "66", fontSize: Typography.xs, fontWeight: "700", textTransform: "uppercase" }}>
+            <Text
+              style={{
+                color: "#ffffff99",
+                fontSize: Typography.xs,
+                fontWeight: "700",
+                textTransform: "uppercase",
+              }}
+            >
               Available balance
             </Text>
-            <Text style={{ color: Colors.bg, fontSize: 29, fontWeight: "900", marginTop: Spacing.xs }}>
-              EUR 246.80
+
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 30,
+                fontWeight: "900",
+                marginTop: 6,
+              }}
+            >
+              EUR {balance.toFixed(2)}
             </Text>
           </View>
+
           <TouchableOpacity
+            onPress={() => setTopupVisible(true)}
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: Spacing.xs + 2,
               backgroundColor: "#fff",
               borderRadius: Radius.lg,
-              paddingHorizontal: Spacing.md,
-              paddingVertical: Spacing.sm + 2,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              gap: 8,
             }}
-            activeOpacity={0.85}
           >
-            <CreditCard size={17} color={"#141111"} />
-            <Text style={{ color: "#141111", fontWeight: "800", fontSize: Typography.xs + 1 }}>Top up</Text>
+            <CreditCard size={16} color="#111" />
+
+            <Text
+              style={{
+                color: "#111",
+                fontWeight: "800",
+              }}
+            >
+              Top up
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Stats Grid */}
-        <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.xxl }}>
-          <StatCard icon={ShoppingBag} label="Purchases" value="18" />
-          <StatCard icon={PackageCheck} label="Delivered" value="14" />
-          <StatCard icon={Heart} label="Wishlist" value={String(wishlist.length)} />
+        {/* STATS */}
+        <View
+          style={{
+            flexDirection: "row",
+            gap: Spacing.sm,
+            marginBottom: Spacing.xl,
+          }}
+        >
+          <StatCard
+            icon={ShoppingBag}
+            label="Purchases"
+            value={String(orders.length)}
+          />
+
+          <StatCard
+            icon={PackageCheck}
+            label="Delivered"
+            value={String(deliveredCount)}
+          />
+
+          <StatCard
+            icon={Heart}
+            label="Wishlist"
+            value={String(wishlist.length)}
+          />
         </View>
 
-        {/* Quick Actions */}
-        <View style={{ marginBottom: Spacing.xxl }}>
-          <Text style={[S.subheading, { marginBottom: Spacing.md }]}>Quick actions</Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm }}>
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <TouchableOpacity
-                  key={action.id}
-                  style={{
-                    width: "48%",
-                    minHeight: 86,
-                    backgroundColor: Colors.card,
-                    borderRadius: Radius.lg,
-                    borderWidth: 1,
-                    borderColor: Colors.border,
-                    padding: Spacing.md,
-                    justifyContent: "space-between",
-                  }}
-                  activeOpacity={0.85}
-                >
-                  <View
-                    style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: Radius.md,
-                      backgroundColor: Colors.input,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Icon size={20} color={Colors.accent} />
-                  </View>
-                  <Text style={{ color: Colors.textPrimary, fontSize: Typography.base, fontWeight: "700" }}>
-                    {action.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+        {/* QUICK ACTIONS */}
+        <View
+          style={{
+            marginBottom: Spacing.xl,
+          }}
+        >
+          <Text
+            style={[
+              S.subheading,
+              {
+                marginBottom: Spacing.md,
+              },
+            ]}
+          >
+            Quick actions
+          </Text>
+
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              gap: Spacing.sm,
+            }}
+          >
+            <ActionCard icon={ShoppingBag} label="Orders" />
+
+            <ActionCard
+              icon={Wallet}
+              label="Wallet"
+              onPress={() => setTopupVisible(true)}
+            />
+
+            <ActionCard icon={MapPin} label="Address" />
+
+            <ActionCard
+              icon={Heart}
+              label="Wishlist"
+              onPress={() => router.push("/wishlist" as any)}
+            />
           </View>
         </View>
 
-        {/* Recent Purchases */}
-        <View style={{ marginBottom: Spacing.xxl }}>
-          <View style={[S.rowBetween, { marginBottom: Spacing.md }]}>
-            <Text style={S.subheading}>Recent purchases</Text>
-            <TouchableOpacity activeOpacity={0.75}>
-              <Text style={{ color: Colors.accent, fontSize: Typography.sm, fontWeight: "700" }}>View all</Text>
-            </TouchableOpacity>
-          </View>
+        {/* RECENT PURCHASES */}
+        <View
+          style={{
+            marginBottom: Spacing.xl,
+          }}
+        >
+          <Text
+            style={[
+              S.subheading,
+              {
+                marginBottom: Spacing.md,
+              },
+            ]}
+          >
+            Recent purchases
+          </Text>
 
-          {recentPurchases.map((purchase) => (
+          {orders.length === 0 ? (
             <View
-              key={purchase.id}
               style={{
-                flexDirection: "row",
-                alignItems: "center",
                 backgroundColor: Colors.card,
                 borderRadius: Radius.lg,
                 borderWidth: 1,
                 borderColor: Colors.border,
-                padding: Spacing.md,
-                marginBottom: Spacing.sm,
+                padding: Spacing.lg,
               }}
             >
-              <View
+              <Text
                 style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: Radius.md,
-                  backgroundColor: Colors.input,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: Spacing.md,
+                  color: Colors.textDim,
+                  textAlign: "center",
                 }}
               >
-                <ShoppingBag size={18} color={Colors.accent} />
-              </View>
-              <View style={{ flex: 1, paddingRight: Spacing.sm }}>
-                <Text style={{ color: Colors.textPrimary, fontSize: Typography.base, fontWeight: "700" }}>
-                  {purchase.title}
-                </Text>
-                <Text style={{ color: Colors.textDim, fontSize: Typography.sm, marginTop: Spacing.xs }}>
-                  {purchase.date} - {purchase.status}
-                </Text>
-              </View>
-              <Text style={{ color: Colors.accent, fontSize: Typography.sm, fontWeight: "800" }}>
-                {purchase.price}
+                No purchases yet
               </Text>
             </View>
-          ))}
+          ) : (
+            orders.map((item, index) => (
+              <View
+                key={index}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: Colors.card,
+                  borderRadius: Radius.lg,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                  padding: Spacing.md,
+                  marginBottom: Spacing.sm,
+                }}
+              >
+                <View
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: Radius.md,
+                    backgroundColor: Colors.input,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: Spacing.md,
+                  }}
+                >
+                  <ShoppingBag size={18} color={Colors.accent} />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      color: Colors.textPrimary,
+                      fontWeight: "700",
+                      fontSize: Typography.base,
+                    }}
+                  >
+                    {item.title}
+                  </Text>
+
+                  <Text
+                    style={{
+                      color: Colors.textDim,
+                      fontSize: Typography.sm,
+                      marginTop: 4,
+                    }}
+                  >
+                    {item.status}
+                  </Text>
+                </View>
+
+                <Text
+                  style={{
+                    color: Colors.accent,
+                    fontWeight: "800",
+                  }}
+                >
+                  EUR {item.price}
+                </Text>
+              </View>
+            ))
+          )}
         </View>
 
-        {/* Profile Settings */}
+        {/* ACCOUNT */}
         <View>
-          <Text style={[S.subheading, { marginBottom: Spacing.md }]}>Profile settings</Text>
-          <MenuRow icon={Bell} title="Notifications" subtitle="Order updates and offers" />
-          <MenuRow icon={MapPin} title="Shipping address" subtitle="Home, work and saved locations" />
-          <MenuRow icon={ShieldCheck} title="Privacy and security" subtitle="Password and account access" />
-          <MenuRow icon={LogOut} title="Sign out" subtitle="Disconnect this account" danger />
+          <Text
+            style={[
+              S.subheading,
+              {
+                marginBottom: Spacing.md,
+              },
+            ]}
+          >
+            Account
+          </Text>
+
+          <MenuRow
+            icon={LogOut}
+            title="Sign out"
+            subtitle="Disconnect account"
+            danger
+            onPress={handleSignOut}
+          />
         </View>
       </ScrollView>
+
+      {/* NAVBAR */}
+      
+
+      {/* TOPUP MODAL */}
+      <Modal visible={topupVisible} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: Colors.card,
+              borderRadius: Radius.xl,
+              padding: 20,
+            }}
+          >
+            <Text
+              style={{
+                color: Colors.textPrimary,
+                fontSize: 20,
+                fontWeight: "800",
+                marginBottom: 16,
+              }}
+            >
+              Top up balance
+            </Text>
+
+            <TextInput
+              value={topupAmount}
+              onChangeText={setTopupAmount}
+              placeholder="Enter amount"
+              keyboardType="numeric"
+              placeholderTextColor={Colors.textMuted}
+              style={{
+                backgroundColor: Colors.input,
+                borderRadius: Radius.lg,
+                padding: 14,
+                color: Colors.textPrimary,
+                marginBottom: 20,
+              }}
+            />
+
+            <TouchableOpacity
+              onPress={handleTopup}
+              style={{
+                backgroundColor: Colors.accent,
+                padding: 14,
+                borderRadius: Radius.lg,
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  fontWeight: "800",
+                }}
+              >
+                Add balance
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setTopupVisible(false)}
+              style={{
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: Colors.textMuted,
+                }}
+              >
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
-  );
+  )
 }
+
+/* ---------------- STAT CARD ---------------- */
 
 function StatCard({
   icon: Icon,
   label,
   value,
 }: {
-  icon: React.ElementType<{ size?: number; color?: string }>;
-  label: string;
-  value: string;
+  icon: React.ElementType
+  label: string
+  value: string
 }) {
   return (
     <View
@@ -392,25 +636,98 @@ function StatCard({
       }}
     >
       <Icon size={20} color={Colors.accent} />
-      <Text style={{ color: Colors.textPrimary, fontSize: 22, fontWeight: "800" }}>{value}</Text>
-      <Text style={{ color: Colors.textDim, fontSize: Typography.xs, fontWeight: "600" }}>{label}</Text>
+
+      <Text
+        style={{
+          color: Colors.textPrimary,
+          fontSize: 22,
+          fontWeight: "900",
+        }}
+      >
+        {value}
+      </Text>
+
+      <Text
+        style={{
+          color: Colors.textDim,
+          fontSize: Typography.xs,
+          fontWeight: "700",
+        }}
+      >
+        {label}
+      </Text>
     </View>
-  );
+  )
 }
+
+/* ---------------- ACTION CARD ---------------- */
+
+function ActionCard({
+  icon: Icon,
+  label,
+  onPress,
+}: {
+  icon: React.ElementType
+  label: string
+  onPress?: () => void
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={{
+        width: "48%",
+        minHeight: 88,
+        backgroundColor: Colors.card,
+        borderRadius: Radius.lg,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        padding: Spacing.md,
+        justifyContent: "space-between",
+      }}
+    >
+      <View
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: Radius.md,
+          backgroundColor: Colors.input,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon size={20} color={Colors.accent} />
+      </View>
+
+      <Text
+        style={{
+          color: Colors.textPrimary,
+          fontWeight: "700",
+        }}
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  )
+}
+
+/* ---------------- MENU ROW ---------------- */
 
 function MenuRow({
   icon: Icon,
   title,
   subtitle,
   danger,
+  onPress,
 }: {
-  icon: React.ElementType<{ size?: number; color?: string }>;
-  title: string;
-  subtitle: string;
-  danger?: boolean;
+  icon: React.ElementType
+  title: string
+  subtitle: string
+  danger?: boolean
+  onPress?: () => void
 }) {
   return (
     <TouchableOpacity
+      onPress={onPress}
       style={{
         flexDirection: "row",
         alignItems: "center",
@@ -421,7 +738,6 @@ function MenuRow({
         padding: Spacing.md,
         marginBottom: Spacing.sm,
       }}
-      activeOpacity={0.8}
     >
       <View
         style={{
@@ -434,17 +750,39 @@ function MenuRow({
           marginRight: Spacing.md,
         }}
       >
-        <Icon size={19} color={danger ? Colors.danger : Colors.accent} />
+        <Icon size={18} color={danger ? Colors.danger : Colors.accent} />
       </View>
+
       <View style={{ flex: 1 }}>
-        <Text style={{ color: danger ? Colors.danger : Colors.textPrimary, fontSize: Typography.base, fontWeight: "700" }}>
+        <Text
+          style={{
+            color: danger ? Colors.danger : Colors.textPrimary,
+            fontWeight: "700",
+            fontSize: Typography.base,
+          }}
+        >
           {title}
         </Text>
-        <Text style={{ color: Colors.textDim, fontSize: Typography.sm, marginTop: Spacing.xs }}>
+
+        <Text
+          style={{
+            color: Colors.textDim,
+            fontSize: Typography.sm,
+            marginTop: 4,
+          }}
+        >
           {subtitle}
         </Text>
       </View>
-      <Text style={{ color: Colors.textMuted, fontSize: 28, lineHeight: 28 }}>{">"}</Text>
+
+      <Text
+        style={{
+          color: Colors.textMuted,
+          fontSize: 28,
+        }}
+      >
+        ›
+      </Text>
     </TouchableOpacity>
-  );
+  )
 }

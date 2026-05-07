@@ -1,6 +1,8 @@
 import { Tabs } from "expo-router"
+import { useState } from "react"
 import React from "react"
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
+import Navbar  from "@/app/components/Navbar"
 
 import { HapticTab } from "@/components/haptic-tab"
 import { IconSymbol } from "@/components/ui/icon-symbol"
@@ -13,9 +15,12 @@ import { useColorScheme } from "@/hooks/use-color-scheme"
 /* ---------------- MAIN LAYOUT ---------------- */
 export default function TabLayout() {
   const colorScheme = useColorScheme()
+  const [search, setSearch] = useState("")
 
   return (
     <View style={{ flex: 1 }}>
+
+      <Navbar search={search} setSearch={setSearch} />
       
       {/* TABS */}
       <Tabs
@@ -23,6 +28,7 @@ export default function TabLayout() {
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
           headerShown: false,
           tabBarButton: HapticTab,
+          tabBarStyle: { display: "none" },
         }}
       >
         <Tabs.Screen

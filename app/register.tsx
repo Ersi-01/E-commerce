@@ -1,11 +1,11 @@
 import { Stack } from 'expo-router';
-import LoginScreen from './screens/loginscreen';
+import RegisterScreen from './screens/registerscreen';
 
-export default function Login() {
+export default function Register() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <LoginScreen />
+      <RegisterScreen />
     </>
   );
 }
