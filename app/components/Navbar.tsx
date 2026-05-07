@@ -1,3 +1,4 @@
+import { Hamburger } from "lucide-react-native";
 import React, { useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { View, Text, TouchableOpacity } from "react-native";
@@ -35,9 +36,9 @@ export default function Navbar({ search, setSearch }: Props) {
       
       {/* TOP BAR */}
       <View style={S.rowBetween}>
-        <Text style={[S.subheading, { marginBottom: 0 }]}>
-          🏪
-        </Text>
+        <TouchableOpacity>
+          <Hamburger />
+        </TouchableOpacity>
 
         <View style={[S.rowBetween, { gap: Spacing.sm }]}>
           
@@ -65,14 +66,6 @@ export default function Navbar({ search, setSearch }: Props) {
           {/* USER */}
           <TouchableOpacity onPress={() => router.push("/(tabs)/Profile")}>
             <User color={Colors.textPrimary} size={22} />
-          </TouchableOpacity>
-
-          {/* LOGIN BUTTON */}
-          <TouchableOpacity
-            style={S.btnChip}
-            onPress={() => router.push("/screens/loginscreen")}
-          >
-            <Text style={S.btnChipText}>Sign In</Text>
           </TouchableOpacity>
 
           {/* MENU */}
