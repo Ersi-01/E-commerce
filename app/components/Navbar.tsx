@@ -6,7 +6,6 @@ import { ShoppingCart, User, Menu, X } from "lucide-react-native";
 
 import { Colors, Spacing, Shadows } from "@/app/styles/global";
 import S from "@/app/styles/global";
-import Searchbar from "@/app/components/Searchbar";
 import { getCart } from "@/app/storage/cartStorage";
 
 type Props = {
@@ -28,21 +27,19 @@ export default function Navbar({ search, setSearch }: Props) {
 
   async function loadCartCount() {
     const cart = await getCart();
-
-    // safer in case structure changes later
     setCartCount(cart?.length ?? 0);
   }
 
   return (
-    <View style={[S.card, { padding: Spacing.sm }, Shadows.card]}>
-
+    <View style={[S.card, { padding: Spacing.sm, margin: Spacing.lg }, Shadows.card]}>
+      
       {/* TOP BAR */}
       <View style={S.rowBetween}>
         <Text style={[S.subheading, { marginBottom: 0 }]}>
-          ShopLogo
+          🏪
         </Text>
 
-        <View style={[S.rowBetween, { gap: Spacing.lg }]}>
+        <View style={[S.rowBetween, { gap: Spacing.sm }]}>
           
           {/* CART */}
           <TouchableOpacity
@@ -70,6 +67,14 @@ export default function Navbar({ search, setSearch }: Props) {
             <User color={Colors.textPrimary} size={22} />
           </TouchableOpacity>
 
+          {/* LOGIN BUTTON */}
+          <TouchableOpacity
+            style={S.btnChip}
+            onPress={() => router.push("/screens/loginscreen")}
+          >
+            <Text style={S.btnChipText}>Sign In</Text>
+          </TouchableOpacity>
+
           {/* MENU */}
           <TouchableOpacity onPress={() => setIsOpen(!isOpen)}>
             {isOpen ? (
@@ -81,55 +86,53 @@ export default function Navbar({ search, setSearch }: Props) {
         </View>
       </View>
 
-      {/* SEARCH */}
-      <Searchbar search={search} setSearch={setSearch} />
-
+      
       {/* DROPDOWN MENU */}
-{isOpen && (
-  <View style={{ marginTop: Spacing.sm }}>
-    
-    <Text
-      onPress={() => {
-        setIsOpen(true);
-        router.push("/(tabs)/Products");
-      }}
-      style={[S.body, { paddingVertical: Spacing.sm }]}
-    >
-      Products
-    </Text>
+      {isOpen && (
+        <View style={{ marginTop: Spacing.sm }}>
+          
+          <Text
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/(tabs)/Products");
+            }}
+            style={[S.body, { paddingVertical: Spacing.sm }]}
+          >
+            Products
+          </Text>
 
-    <Text
-      onPress={() => {
-        setIsOpen(true);
-        router.push("/catalogue");
-      }}
-      style={[S.body, { paddingVertical: Spacing.sm }]}
-    >
-      Catalogue
-    </Text>
+          <Text
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/catalogue");
+            }}
+            style={[S.body, { paddingVertical: Spacing.sm }]}
+          >
+            Catalogue
+          </Text>
 
-    <Text
-      onPress={() => {
-        setIsOpen(true);
-        router.push("/wishlist");
-      }}
-      style={[S.body, { paddingVertical: Spacing.sm }]}
-    >
-      Wishlist
-    </Text>
+          <Text
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/wishlist");
+            }}
+            style={[S.body, { paddingVertical: Spacing.sm }]}
+          >
+            Wishlist
+          </Text>
 
-    <Text
-      onPress={() => {
-        setIsOpen(true);
-        router.push("/(tabs)/Profile");
-      }}
-      style={[S.body, { paddingVertical: Spacing.sm }]}
-    >
-      Profile
-    </Text>
+          <Text
+            onPress={() => {
+              setIsOpen(false);
+              router.push("/(tabs)/Profile");
+            }}
+            style={[S.body, { paddingVertical: Spacing.sm }]}
+          >
+            Profile
+          </Text>
 
-  </View>
-)}
+        </View>
+      )}
     </View>
   );
 }

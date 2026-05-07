@@ -22,39 +22,41 @@ export default function Wishlist() {
       <Text style={S.heading}>❤️ Wishlist ({wishlist.length})</Text>
 
       {wishlist.length === 0 ? (
-        <Text style={S.emptyText}>Wishlist juaj është bosh</Text>
+        <Text style={S.emptyText}>Wishlist is empty</Text>
       ) : (
         <FlatList
           data={wishlist}
           keyExtractor={(item) => item.id.toString()}
           scrollEnabled={true}
           renderItem={({ item }) => (
-            <View style={S.card}>
-              {/* Product Info */}
-              <View style={{ flex: 1 }}>
-                <Text style={S.subheading}>{item.name}</Text>
-                <Text style={[S.label, { marginTop: Spacing.xs }]}>{item.category}</Text>
-                <Text style={[S.price, { marginTop: Spacing.xs }]}>€{item.price}</Text>
-              </View>
+  <View style={S.card}>
+    {/* Product Info */}
+    <View style={{ flex: 1 }}>
+      <Text style={S.subheading}>{item.name}</Text>
+      <Text style={[S.label, { marginTop: Spacing.xs }]}>{item.category}</Text>
+      <Text style={[S.price, { marginTop: Spacing.xs }]}>€{item.price}</Text>
+    </View>
 
-              {/* Remove Button */}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: Colors.danger,
-                  paddingHorizontal: Spacing.lg,
-                  paddingVertical: Spacing.sm + 2,
-                  borderRadius: 8,
-                  marginLeft: 620,
-                }}
-                onPress={() => {
-                  removeFromWishlist(item.id);
-                  showToast(`${item.name} removed from wishlist`);
-                }}
-              >
-                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>Remove</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+    {/* Remove Button - Version i përmirësuar për mobile */}
+    <TouchableOpacity
+      style={{
+        backgroundColor: Colors.danger,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 8,
+        marginLeft: 12,
+      }}
+      onPress={() => {
+        removeFromWishlist(item.id);
+        showToast(`${item.name} removed from wishlist`);
+      }}
+    >
+      <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
+        Remove
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
         />
       )}
 

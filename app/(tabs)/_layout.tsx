@@ -8,25 +8,7 @@ import { Colors } from "@/constants/theme"
 import { useColorScheme } from "@/hooks/use-color-scheme"
 
 /* ---------------- FOOTER COMPONENT ---------------- */
-function Footer() {
-  return (
-    <View style={styles.footer}>
-      <View style={styles.links}>
-        <TouchableOpacity>
-          <Text style={styles.link}>About</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.link}>Contact</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.link}>Privacy</Text>
-        </TouchableOpacity>
-      </View>
 
-      <Text style={styles.copy}>© 2026 MyShop</Text>
-    </View>
-  )
-}
 
 /* ---------------- MAIN LAYOUT ---------------- */
 export default function TabLayout() {
@@ -34,6 +16,7 @@ export default function TabLayout() {
 
   return (
     <View style={{ flex: 1 }}>
+      
       {/* TABS */}
       <Tabs
         screenOptions={{
@@ -72,7 +55,7 @@ export default function TabLayout() {
           }}
         />
 
-        <Tabs.Screen
+        {/* <Tabs.Screen
           name="explore"
           options={{
             title: "Explore",
@@ -80,11 +63,11 @@ export default function TabLayout() {
               <IconSymbol size={28} name="paperplane.fill" color={color} />
             ),
           }}
-        />
+        /> */}
       </Tabs>
 
       {/* GLOBAL FOOTER */}
-      <Footer />
+      
     </View>
   )
 }
