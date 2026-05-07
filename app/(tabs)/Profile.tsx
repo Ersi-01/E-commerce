@@ -22,14 +22,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 import { useWishlist } from "../context/WishlistContext";
 import S, { Colors, Spacing, Radius, Typography } from "@/app/styles/global";
-
-const STORAGE_KEYS = {
-  USER_TOKEN: "@ecommerce_user_token",
-  USER_EMAIL: "@ecommerce_user_email",
-};
 
 const recentPurchases = [
   { id: "1", title: "Wireless Headphones", date: "12 Apr", price: "EUR 89.90", status: "Delivered" },
@@ -46,19 +42,21 @@ const quickActions = [
 
 export default function Profile() {
   const { wishlist } = useWishlist();
+  const router = useRouter();
   const [email, setEmail] = useState("user@store.com");
+  const [name, setName] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const [savedEmail, token] = await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEYS.USER_EMAIL),
-          AsyncStorage.getItem(STORAGE_KEYS.USER_TOKEN),
-        ]);
-
-        if (savedEmail) setEmail(savedEmail);
-        setIsLoggedIn(Boolean(token));
+        const saved = await AsyncStorage.getItem("@ecommerce_user");
+        if (saved) {
+          const user = JSON.parse(saved);
+          if (user.email) setEmail(user.email);
+          if (user.name) setName(user.name);
+          setIsLoggedIn(true);
+        }
       } catch (error) {
         console.log("Failed to load profile data", error);
       }
@@ -68,13 +66,14 @@ export default function Profile() {
   }, []);
 
   const displayName = useMemo(() => {
-    const name = email.split("@")[0]?.replace(/[._-]/g, " ") || "ShopWave User";
-    return name
+    if (name) return name;
+    const derived = email.split("@")[0]?.replace(/[._-]/g, " ") || "ShopWave User";
+    return derived
       .split(" ")
       .filter(Boolean)
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ");
-  }, [email]);
+  }, [email, name]);
 
   const initials = useMemo(() => {
     return displayName
@@ -85,12 +84,17 @@ export default function Profile() {
       .toUpperCase();
   }, [displayName]);
 
+  const handleSignOut = async () => {
+    await AsyncStorage.removeItem("@ecommerce_user");
+    router.replace("/login" as any);
+  };
+
   return (
     <View style={[S.screenNoPad, { backgroundColor: Colors.bg }]}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
 
-      <ScrollView 
-        contentContainerStyle={{ padding: 16, paddingTop: 54, paddingBottom: 28 }} 
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingTop: 54, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
         scrollEnabled={true}
       >
@@ -129,7 +133,6 @@ export default function Profile() {
             },
           ]}
         >
-          {/* Avatar */}
           <View style={{ marginRight: Spacing.lg, position: "relative" }}>
             <View
               style={{
@@ -169,12 +172,10 @@ export default function Profile() {
             </TouchableOpacity>
           </View>
 
-          {/* Profile Info */}
           <View style={{ flex: 1 }}>
             <Text style={S.subheading}>{displayName}</Text>
             <Text style={[S.caption, { marginTop: Spacing.xs }]}>{email}</Text>
 
-            {/* Member Badge */}
             <View
               style={{
                 alignSelf: "flex-start",
@@ -362,7 +363,7 @@ export default function Profile() {
           <MenuRow icon={Bell} title="Notifications" subtitle="Order updates and offers" />
           <MenuRow icon={MapPin} title="Shipping address" subtitle="Home, work and saved locations" />
           <MenuRow icon={ShieldCheck} title="Privacy and security" subtitle="Password and account access" />
-          <MenuRow icon={LogOut} title="Sign out" subtitle="Disconnect this account" danger />
+          <MenuRow icon={LogOut} title="Sign out" subtitle="Disconnect this account" danger onPress={handleSignOut} />
         </View>
       </ScrollView>
     </View>
@@ -403,14 +404,17 @@ function MenuRow({
   title,
   subtitle,
   danger,
+  onPress,
 }: {
   icon: React.ElementType<{ size?: number; color?: string }>;
   title: string;
   subtitle: string;
   danger?: boolean;
+  onPress?: () => void;
 }) {
   return (
     <TouchableOpacity
+      onPress={onPress}
       style={{
         flexDirection: "row",
         alignItems: "center",
