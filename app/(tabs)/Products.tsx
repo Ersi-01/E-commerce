@@ -1,12 +1,12 @@
-import { View, Text, FlatList, TouchableOpacity, Animated } from "react-native";
-import { router } from "expo-router";
-import products from "../data/products";
-import { useWishlist } from "../context/WishlistContext";
-import { addToCart } from "../storage/cartStorage";
-import Filter, { FilterOptions } from "../components/Filter";
 import S from "@/app/styles/global";
-import { useRef, useState, useMemo } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Animated, FlatList, Text, TouchableOpacity, View } from "react-native";
+import Filter, { FilterOptions } from "../components/Filter";
 import Navbar from "../components/Navbar";
+import { useWishlist } from "../context/WishlistContext";
+import products from "../data/products";
+import { addToCart } from "../storage/cartStorage";
 
 type Product = {
   id: number;
@@ -20,6 +20,7 @@ type Product = {
 };
 
 export default function ProductsScreen() {
+  const params = useLocalSearchParams();
   const { addToWishlist, isInWishlist } = useWishlist();
   const [toastMessage, setToastMessage] = useState("");
   const [search, setSearch] = useState("");
@@ -30,11 +31,18 @@ export default function ProductsScreen() {
   });
   const opacity = useRef(new Animated.Value(0)).current;
 
+  // Apply category from params when component mounts or params change
+  useEffect(() => {
+    if (params.category && typeof params.category === "string") {
+      setFilters((prev) => ({ ...prev, category: params.category as string }));
+    }
+  }, [params.category]);
+
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
     result = result.filter((item) =>
-      item.name.toLowerCase().includes(search.toLowerCase())
+      item.name.toLowerCase().includes(search.toLowerCase()),
     );
 
     if (filters.category !== "All") {
@@ -57,16 +65,27 @@ export default function ProductsScreen() {
   function showToast(message: string) {
     setToastMessage(message);
     Animated.sequence([
-      Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
       Animated.delay(1500),
-      Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
     ]).start();
   }
 
   const renderItem = ({ item }: { item: Product }) => (
     <TouchableOpacity
       onPress={() =>
-        router.push({ pathname: "/screens/productdetails", params: { id: item.id } })
+        router.push({
+          pathname: "/screens/productdetails",
+          params: { id: item.id },
+        })
       }
     >
       <View style={S.card}>
@@ -111,10 +130,8 @@ export default function ProductsScreen() {
 
   return (
     <View style={S.screen}>
-      {/* Navbar — handles search bar, cart icon, profile icon, and dropdown nav */}
       <Navbar search={search} setSearch={setSearch} />
 
-      {/* Filter row — sits below the navbar */}
       <View
         style={[
           S.screenHeader,
@@ -124,11 +141,11 @@ export default function ProductsScreen() {
         <Text style={S.label}>
           {filteredProducts.length}{" "}
           {filteredProducts.length === 1 ? "product" : "products"}
+          {filters.category !== "All" && ` in ${filters.category}`}
         </Text>
         <Filter onFilterChange={setFilters} />
       </View>
 
-      {/* Products list */}
       {filteredProducts.length > 0 ? (
         <FlatList
           data={filteredProducts}
@@ -140,7 +157,6 @@ export default function ProductsScreen() {
         <Text style={S.emptyText}>No products match your filters</Text>
       )}
 
-      {/* Toast notification */}
       <Animated.View
         style={{
           opacity,
