@@ -57,10 +57,11 @@ export default function Cart() {
         >
           <Text
             style={[
-              S.subheading,
+              S.price,
               {
                 marginTop: Spacing.lg,
                 textAlign: "center",
+                fontSize: 20,
               },
             ]}
           >
@@ -78,6 +79,7 @@ export default function Cart() {
           contentContainerStyle={{
             paddingTop: 80,
             paddingBottom: 40,
+            marginTop: 24,
           }}
           showsVerticalScrollIndicator={false}
         >
