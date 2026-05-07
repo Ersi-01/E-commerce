@@ -17,43 +17,38 @@ import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Typography } from '@/app/styles/global';
 import S from '@/app/styles/global';
 
-type LoginErrors = {
+type RegisterErrors = {
+  name?: string | null;
   email?: string | null;
   password?: string | null;
+  confirmPassword?: string | null;
 };
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<LoginErrors>({});
+  const [errors, setErrors] = useState<RegisterErrors>({});
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
+
+  const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
+  const confirmRef = useRef<TextInput>(null);
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 10, useNativeDriver: true }),
     ]).start();
-
-    checkExistingUser();
   }, []);
-
-  const checkExistingUser = async () => {
-  try {
-    const saved = await AsyncStorage.getItem('@ecommerce_user');
-    if (saved) {
-      router.replace('/(tabs)' as any);
-    }
-  } catch (e) {
-    console.log('Storage error', e);
-  }
-};
 
   const triggerShake = () => {
     Animated.sequence([
@@ -66,7 +61,10 @@ export default function LoginScreen() {
   };
 
   const validate = () => {
-    const newErrors: LoginErrors = {};
+    const newErrors: RegisterErrors = {};
+    if (!name.trim()) {
+      newErrors.name = 'Name is required';
+    }
     if (!email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
@@ -77,11 +75,16 @@ export default function LoginScreen() {
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     if (!validate()) {
       triggerShake();
       return;
@@ -89,27 +92,10 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const saved = await AsyncStorage.getItem('@ecommerce_user');
-
-      if (!saved) {
-        setErrors({ email: 'No account found. Please register first.' });
-        triggerShake();
-        setLoading(false);
-        return;
-      }
-
-      const user = JSON.parse(saved);
-
-      if (user.email !== email) {
-        setErrors({ email: 'Email does not match our records.' });
-        triggerShake();
-        setLoading(false);
-        return;
-      }
-
+      await AsyncStorage.setItem('@ecommerce_user', JSON.stringify({ name, email }));
       router.replace('/(tabs)');
     } catch (e) {
-      console.log('Login error', e);
+      console.log('Register error', e);
     } finally {
       setLoading(false);
     }
@@ -137,14 +123,31 @@ export default function LoginScreen() {
         >
           <View style={styles.header}>
             <Text style={styles.brandName}>ShopWave</Text>
-            <Text style={S.caption}>Sign in to continue</Text>
+            <Text style={S.caption}>Create your account</Text>
           </View>
 
           <View style={S.cardElevated}>
 
             <View style={styles.fieldGroup}>
+              <Text style={S.label}>Full Name</Text>
+              <TextInput
+                style={[styles.input, errors.name ? S.inputError : null, { outlineStyle: 'none' } as any]}
+                placeholder="John Doe"
+                placeholderTextColor={Colors.textMuted}
+                value={name}
+                onChangeText={t => { setName(t); setErrors(e => ({ ...e, name: null })); }}
+                autoCapitalize="words"
+                autoCorrect={false}
+                returnKeyType="next"
+                onSubmitEditing={() => emailRef.current?.focus()}
+              />
+              {errors.name && <Text style={S.fieldError}>{errors.name}</Text>}
+            </View>
+
+            <View style={styles.fieldGroup}>
               <Text style={S.label}>Email</Text>
               <TextInput
+                ref={emailRef}
                 style={[styles.input, errors.email ? S.inputError : null, { outlineStyle: 'none' } as any]}
                 placeholder="you@example.com"
                 placeholderTextColor={Colors.textMuted}
@@ -170,8 +173,8 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={t => { setPassword(t); setErrors(e => ({ ...e, password: null })); }}
                   secureTextEntry={!showPassword}
-                  returnKeyType="done"
-                  onSubmitEditing={handleLogin}
+                  returnKeyType="next"
+                  onSubmitEditing={() => confirmRef.current?.focus()}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(v => !v)}
@@ -183,25 +186,49 @@ export default function LoginScreen() {
               {errors.password && <Text style={S.fieldError}>{errors.password}</Text>}
             </View>
 
+            <View style={styles.fieldGroup}>
+              <Text style={S.label}>Confirm Password</Text>
+              <View style={[S.inputWrapper, errors.confirmPassword ? S.inputError : null]}>
+                <TextInput
+                  ref={confirmRef}
+                  style={[S.inputText, { outlineStyle: 'none' } as any]}
+                  placeholder="Repeat your password"
+                  placeholderTextColor={Colors.textMuted}
+                  value={confirmPassword}
+                  onChangeText={t => { setConfirmPassword(t); setErrors(e => ({ ...e, confirmPassword: null })); }}
+                  secureTextEntry={!showConfirm}
+                  returnKeyType="done"
+                  onSubmitEditing={handleRegister}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowConfirm(v => !v)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Text style={styles.showHideText}>{showConfirm ? 'HIDE' : 'SHOW'}</Text>
+                </TouchableOpacity>
+              </View>
+              {errors.confirmPassword && <Text style={S.fieldError}>{errors.confirmPassword}</Text>}
+            </View>
+
             <TouchableOpacity
               style={[S.btnPrimary, loading && S.btnDisabled]}
-              onPress={handleLogin}
+              onPress={handleRegister}
               disabled={loading}
               activeOpacity={0.85}
             >
               {loading
                 ? <ActivityIndicator color={Colors.accentDark} />
-                : <Text style={S.btnPrimaryText}>Sign In</Text>
+                : <Text style={S.btnPrimaryText}>Create Account</Text>
               }
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.signupRow}
-              onPress={() => router.push('/register' as any)}
+              style={styles.loginRow}
+              onPress={() => router.push('/login' as any)}
             >
               <Text style={S.caption}>
-                Don't have an account?{' '}
-                <Text style={styles.signupLink}>Create one</Text>
+                Already have an account?{' '}
+                <Text style={styles.loginLink}>Sign in</Text>
               </Text>
             </TouchableOpacity>
 
@@ -250,11 +277,11 @@ const styles = StyleSheet.create({
     fontWeight: Typography.bold,
     letterSpacing: 0.8,
   },
-  signupRow: {
+  loginRow: {
     alignItems: 'center',
     marginTop: Spacing.xl,
   },
-  signupLink: {
+  loginLink: {
     color: Colors.accent,
     fontWeight: Typography.bold,
   },
