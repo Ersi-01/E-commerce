@@ -89,7 +89,7 @@ export default function HomeScreen() {
         <View style={S.rowWrap}>
           <TouchableOpacity
             style={[S.card, styles.navCard]}
-            onPress={() => router.push("/screens/Products")}
+            onPress={() => router.push("/(tabs)/Products")}
             activeOpacity={0.75}
           >
             <Text style={styles.navIcon}>🛍️</Text>

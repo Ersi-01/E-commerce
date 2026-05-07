@@ -27,19 +27,12 @@ export default function Navbar({ search, setSearch }: Props) {
 
   async function loadCartCount() {
     const cart = await getCart();
-
-    // safer in case structure changes later
     setCartCount(cart?.length ?? 0);
   }
 
   return (
-<<<<<<< HEAD
-    <View style={[S.card, { padding: Spacing.sm, marginTop: 30 }, Shadows.card]}>
-
-=======
-    <View style={[S.card, { padding: Spacing.sm }, Shadows.card]}>
+    <View style={[S.card, { padding: Spacing.sm, margin: Spacing.lg }, Shadows.card]}>
       
->>>>>>> 537fbc0789d099731389521596cfcde6a8b37210
       {/* TOP BAR */}
       <View style={S.rowBetween}>
         <Text style={[S.subheading, { marginBottom: 0 }]}>
@@ -93,21 +86,8 @@ export default function Navbar({ search, setSearch }: Props) {
         </View>
       </View>
 
+      
       {/* DROPDOWN MENU */}
-<<<<<<< HEAD
-{isOpen && (
-  <View style={{ marginTop: Spacing.sm }}>
-    
-    <Text
-      onPress={() => {
-        setIsOpen(false);
-        router.push("/screens/Products");
-      }}
-      style={[S.body, { paddingVertical: Spacing.sm }]}
-    >
-      Products
-    </Text>
-=======
       {isOpen && (
         <View style={{ marginTop: Spacing.sm }}>
           
@@ -120,7 +100,6 @@ export default function Navbar({ search, setSearch }: Props) {
           >
             Products
           </Text>
->>>>>>> 537fbc0789d099731389521596cfcde6a8b37210
 
           <Text
             onPress={() => {
