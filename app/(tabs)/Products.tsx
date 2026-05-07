@@ -3,7 +3,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, FlatList, Text, TouchableOpacity, View } from "react-native";
 import Filter, { FilterOptions } from "../components/Filter";
-import Navbar from "../components/Navbar";
 import { useWishlist } from "../context/WishlistContext";
 import products from "../data/products";
 import { addToCart } from "../storage/cartStorage";
