@@ -89,7 +89,11 @@ export default function Profile() {
     <View style={[S.screenNoPad, { backgroundColor: Colors.bg }]}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
 
-      <ScrollView contentContainerStyle={[S.screen, { paddingTop: 54 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        contentContainerStyle={{ padding: 16, paddingTop: 54, paddingBottom: 28 }} 
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={true}
+      >
         {/* Header */}
         <View style={[S.screenHeader, { justifyContent: "space-between", marginBottom: Spacing.xl }]}>
           <View>
@@ -161,7 +165,7 @@ export default function Profile() {
               }}
               activeOpacity={0.8}
             >
-              <Camera size={15} color={"#151313"} />
+              <Camera size={15} color={"#141111"} />
             </TouchableOpacity>
           </View>
 
@@ -247,8 +251,8 @@ export default function Profile() {
             }}
             activeOpacity={0.85}
           >
-            <CreditCard size={17} color={"#120b0b"} />
-            <Text style={{ color: "#120b0b" , fontWeight: "800", fontSize: Typography.xs + 1 }}>Top up</Text>
+            <CreditCard size={17} color={"#141111"} />
+            <Text style={{ color: "#141111", fontWeight: "800", fontSize: Typography.xs + 1 }}>Top up</Text>
           </TouchableOpacity>
         </View>
 
