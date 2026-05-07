@@ -23,7 +23,7 @@ function Footer() {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.copy}>© 2026 MyShop</Text>
+      <Text style={styles.copy}>© 2026 ShopApp</Text>
     </View>
   )
 }
@@ -72,7 +72,7 @@ export default function TabLayout() {
           }}
         />
 
-        <Tabs.Screen
+        {/* <Tabs.Screen
           name="explore"
           options={{
             title: "Explore",
@@ -80,7 +80,7 @@ export default function TabLayout() {
               <IconSymbol size={28} name="paperplane.fill" color={color} />
             ),
           }}
-        />
+        /> */}
       </Tabs>
 
       {/* GLOBAL FOOTER */}

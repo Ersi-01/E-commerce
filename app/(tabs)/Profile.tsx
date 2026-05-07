@@ -18,24 +18,18 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
 import { useWishlist } from "../context/WishlistContext";
+import S, { Colors, Spacing, Radius, Typography } from "@/app/styles/global";
 
 const STORAGE_KEYS = {
   USER_TOKEN: "@ecommerce_user_token",
   USER_EMAIL: "@ecommerce_user_email",
 };
-
-const ACCENT = "#f0c060";
-const BG = "#0a0a0f";
-const CARD_BG = "#13131a";
-const SOFT_CARD = "#1a1a24";
-const BORDER = "#2a2a3a";
 
 const recentPurchases = [
   { id: "1", title: "Wireless Headphones", date: "12 Apr", price: "EUR 89.90", status: "Delivered" },
@@ -92,110 +86,279 @@ export default function Profile() {
   }, [displayName]);
 
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor={BG} />
+    <View style={[S.screenNoPad, { backgroundColor: Colors.bg }]}>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
+      <ScrollView 
+        contentContainerStyle={{ padding: 16, paddingTop: 54, paddingBottom: 28 }} 
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={true}
+      >
+        {/* Header */}
+        <View style={[S.screenHeader, { justifyContent: "space-between", marginBottom: Spacing.xl }]}>
           <View>
-            <Text style={styles.eyebrow}>My account</Text>
-            <Text style={styles.title}>Profile</Text>
+            <Text style={S.label}>My account</Text>
+            <Text style={S.heading}>Profile</Text>
           </View>
 
-          <TouchableOpacity style={styles.iconButton} activeOpacity={0.8}>
-            <Settings size={21} color="#fff" />
+          <TouchableOpacity
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: Radius.lg,
+              backgroundColor: Colors.card,
+              borderWidth: 1,
+              borderColor: Colors.border,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            activeOpacity={0.8}
+          >
+            <Settings size={21} color={Colors.textPrimary} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.profileCard}>
-          <View style={styles.avatarWrap}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials}</Text>
+        {/* Profile Card */}
+        <View
+          style={[
+            S.cardElevated,
+            {
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: Spacing.md,
+            },
+          ]}
+        >
+          {/* Avatar */}
+          <View style={{ marginRight: Spacing.lg, position: "relative" }}>
+            <View
+              style={{
+                width: 78,
+                height: 78,
+                borderRadius: Radius.lg,
+                backgroundColor: Colors.accent,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: Colors.bg,
+                  fontSize: 26,
+                  fontWeight: "900",
+                }}
+              >
+                {initials}
+              </Text>
             </View>
-            <TouchableOpacity style={styles.cameraButton} activeOpacity={0.8}>
-              <Camera size={15} color={BG} />
+            <TouchableOpacity
+              style={{
+                position: "absolute",
+                right: -5,
+                bottom: -5,
+                width: 30,
+                height: 30,
+                borderRadius: Radius.md,
+                backgroundColor: "#fff",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              activeOpacity={0.8}
+            >
+              <Camera size={15} color={"#141111"} />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.profileInfo}>
-            <Text style={styles.name}>{displayName}</Text>
-            <Text style={styles.email}>{email}</Text>
-            <View style={styles.memberPill}>
-              <Star size={13} color={ACCENT} fill={ACCENT} />
-              <Text style={styles.memberText}>Gold member</Text>
+          {/* Profile Info */}
+          <View style={{ flex: 1 }}>
+            <Text style={S.subheading}>{displayName}</Text>
+            <Text style={[S.caption, { marginTop: Spacing.xs }]}>{email}</Text>
+
+            {/* Member Badge */}
+            <View
+              style={{
+                alignSelf: "flex-start",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: Spacing.xs,
+                marginTop: Spacing.sm,
+                paddingHorizontal: Spacing.md,
+                paddingVertical: Spacing.xs + 2,
+                borderRadius: 999,
+                backgroundColor: Colors.accent + "15",
+                borderWidth: 1,
+                borderColor: Colors.accent + "44",
+              }}
+            >
+              <Star size={13} color={Colors.accent} fill={Colors.accent} />
+              <Text style={{ color: Colors.accent, fontSize: Typography.xs, fontWeight: "700" }}>
+                Gold member
+              </Text>
             </View>
           </View>
         </View>
 
         {!isLoggedIn && (
-          <View style={styles.notice}>
-            <User size={18} color={ACCENT} />
-            <Text style={styles.noticeText}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: Spacing.md,
+              backgroundColor: Colors.accent + "14",
+              borderColor: Colors.accent + "33",
+              borderWidth: 1,
+              borderRadius: Radius.lg,
+              padding: Spacing.md,
+              marginBottom: Spacing.md,
+            }}
+          >
+            <User size={18} color={Colors.accent} />
+            <Text style={{ flex: 1, color: Colors.accent + "cc", fontSize: Typography.sm, lineHeight: 17 }}>
               Template profile. After login, this screen can use real user data.
             </Text>
           </View>
         )}
 
-        <View style={styles.balanceCard}>
+        {/* Balance Card */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            backgroundColor: Colors.accent,
+            borderRadius: Radius.xxl,
+            padding: Spacing.xl,
+            marginBottom: Spacing.xl,
+          }}
+        >
           <View>
-            <Text style={styles.balanceLabel}>Available balance</Text>
-            <Text style={styles.balanceAmount}>EUR 246.80</Text>
+            <Text style={{ color: Colors.textPrimary + "66", fontSize: Typography.xs, fontWeight: "700", textTransform: "uppercase" }}>
+              Available balance
+            </Text>
+            <Text style={{ color: Colors.bg, fontSize: 29, fontWeight: "900", marginTop: Spacing.xs }}>
+              EUR 246.80
+            </Text>
           </View>
-          <TouchableOpacity style={styles.topUpButton} activeOpacity={0.85}>
-            <CreditCard size={17} color={BG} />
-            <Text style={styles.topUpText}>Top up</Text>
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: Spacing.xs + 2,
+              backgroundColor: "#fff",
+              borderRadius: Radius.lg,
+              paddingHorizontal: Spacing.md,
+              paddingVertical: Spacing.sm + 2,
+            }}
+            activeOpacity={0.85}
+          >
+            <CreditCard size={17} color={"#141111"} />
+            <Text style={{ color: "#141111", fontWeight: "800", fontSize: Typography.xs + 1 }}>Top up</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.statsGrid}>
+        {/* Stats Grid */}
+        <View style={{ flexDirection: "row", gap: Spacing.sm, marginBottom: Spacing.xxl }}>
           <StatCard icon={ShoppingBag} label="Purchases" value="18" />
           <StatCard icon={PackageCheck} label="Delivered" value="14" />
           <StatCard icon={Heart} label="Wishlist" value={String(wishlist.length)} />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick actions</Text>
-          <View style={styles.actionsGrid}>
+        {/* Quick Actions */}
+        <View style={{ marginBottom: Spacing.xxl }}>
+          <Text style={[S.subheading, { marginBottom: Spacing.md }]}>Quick actions</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm }}>
             {quickActions.map((action) => {
               const Icon = action.icon;
               return (
-                <TouchableOpacity key={action.id} style={styles.actionCard} activeOpacity={0.85}>
-                  <View style={styles.actionIcon}>
-                    <Icon size={20} color={ACCENT} />
+                <TouchableOpacity
+                  key={action.id}
+                  style={{
+                    width: "48%",
+                    minHeight: 86,
+                    backgroundColor: Colors.card,
+                    borderRadius: Radius.lg,
+                    borderWidth: 1,
+                    borderColor: Colors.border,
+                    padding: Spacing.md,
+                    justifyContent: "space-between",
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <View
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: Radius.md,
+                      backgroundColor: Colors.input,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon size={20} color={Colors.accent} />
                   </View>
-                  <Text style={styles.actionLabel}>{action.label}</Text>
+                  <Text style={{ color: Colors.textPrimary, fontSize: Typography.base, fontWeight: "700" }}>
+                    {action.label}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
           </View>
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent purchases</Text>
+        {/* Recent Purchases */}
+        <View style={{ marginBottom: Spacing.xxl }}>
+          <View style={[S.rowBetween, { marginBottom: Spacing.md }]}>
+            <Text style={S.subheading}>Recent purchases</Text>
             <TouchableOpacity activeOpacity={0.75}>
-              <Text style={styles.viewAll}>View all</Text>
+              <Text style={{ color: Colors.accent, fontSize: Typography.sm, fontWeight: "700" }}>View all</Text>
             </TouchableOpacity>
           </View>
 
           {recentPurchases.map((purchase) => (
-            <View key={purchase.id} style={styles.purchaseRow}>
-              <View style={styles.purchaseIcon}>
-                <ShoppingBag size={18} color={ACCENT} />
+            <View
+              key={purchase.id}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: Colors.card,
+                borderRadius: Radius.lg,
+                borderWidth: 1,
+                borderColor: Colors.border,
+                padding: Spacing.md,
+                marginBottom: Spacing.sm,
+              }}
+            >
+              <View
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: Radius.md,
+                  backgroundColor: Colors.input,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: Spacing.md,
+                }}
+              >
+                <ShoppingBag size={18} color={Colors.accent} />
               </View>
-              <View style={styles.purchaseInfo}>
-                <Text style={styles.purchaseTitle}>{purchase.title}</Text>
-                <Text style={styles.purchaseMeta}>
+              <View style={{ flex: 1, paddingRight: Spacing.sm }}>
+                <Text style={{ color: Colors.textPrimary, fontSize: Typography.base, fontWeight: "700" }}>
+                  {purchase.title}
+                </Text>
+                <Text style={{ color: Colors.textDim, fontSize: Typography.sm, marginTop: Spacing.xs }}>
                   {purchase.date} - {purchase.status}
                 </Text>
               </View>
-              <Text style={styles.purchasePrice}>{purchase.price}</Text>
+              <Text style={{ color: Colors.accent, fontSize: Typography.sm, fontWeight: "800" }}>
+                {purchase.price}
+              </Text>
             </View>
           ))}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Profile settings</Text>
+        {/* Profile Settings */}
+        <View>
+          <Text style={[S.subheading, { marginBottom: Spacing.md }]}>Profile settings</Text>
           <MenuRow icon={Bell} title="Notifications" subtitle="Order updates and offers" />
           <MenuRow icon={MapPin} title="Shipping address" subtitle="Home, work and saved locations" />
           <MenuRow icon={ShieldCheck} title="Privacy and security" subtitle="Password and account access" />
@@ -216,10 +379,21 @@ function StatCard({
   value: string;
 }) {
   return (
-    <View style={styles.statCard}>
-      <Icon size={20} color={ACCENT} />
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View
+      style={{
+        flex: 1,
+        minHeight: 100,
+        backgroundColor: Colors.card,
+        borderRadius: Radius.lg,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        padding: Spacing.md,
+        justifyContent: "space-between",
+      }}
+    >
+      <Icon size={20} color={Colors.accent} />
+      <Text style={{ color: Colors.textPrimary, fontSize: 22, fontWeight: "800" }}>{value}</Text>
+      <Text style={{ color: Colors.textDim, fontSize: Typography.xs, fontWeight: "600" }}>{label}</Text>
     </View>
   );
 }
@@ -236,330 +410,41 @@ function MenuRow({
   danger?: boolean;
 }) {
   return (
-    <TouchableOpacity style={styles.menuRow} activeOpacity={0.8}>
-      <View style={[styles.menuIcon, danger && styles.menuIconDanger]}>
-        <Icon size={19} color={danger ? "#ff6666" : ACCENT} />
+    <TouchableOpacity
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: Colors.card,
+        borderRadius: Radius.lg,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        padding: Spacing.md,
+        marginBottom: Spacing.sm,
+      }}
+      activeOpacity={0.8}
+    >
+      <View
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: Radius.md,
+          backgroundColor: danger ? Colors.danger + "15" : Colors.input,
+          alignItems: "center",
+          justifyContent: "center",
+          marginRight: Spacing.md,
+        }}
+      >
+        <Icon size={19} color={danger ? Colors.danger : Colors.accent} />
       </View>
-      <View style={styles.menuText}>
-        <Text style={[styles.menuTitle, danger && styles.dangerText]}>{title}</Text>
-        <Text style={styles.menuSubtitle}>{subtitle}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: danger ? Colors.danger : Colors.textPrimary, fontSize: Typography.base, fontWeight: "700" }}>
+          {title}
+        </Text>
+        <Text style={{ color: Colors.textDim, fontSize: Typography.sm, marginTop: Spacing.xs }}>
+          {subtitle}
+        </Text>
       </View>
-      <Text style={styles.chevron}>{">"}</Text>
+      <Text style={{ color: Colors.textMuted, fontSize: 28, lineHeight: 28 }}>{">"}</Text>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: BG,
-  },
-  content: {
-    padding: 16,
-    paddingTop: 54,
-    paddingBottom: 28,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 18,
-  },
-  eyebrow: {
-    color: ACCENT,
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-  },
-  title: {
-    color: "#fff",
-    fontSize: 28,
-    fontWeight: "800",
-    marginTop: 2,
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: SOFT_CARD,
-    borderWidth: 1,
-    borderColor: BORDER,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  profileCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: CARD_BG,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: BORDER,
-    padding: 18,
-    marginBottom: 12,
-  },
-  avatarWrap: {
-    marginRight: 16,
-  },
-  avatar: {
-    width: 78,
-    height: 78,
-    borderRadius: 24,
-    backgroundColor: ACCENT,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: {
-    color: BG,
-    fontSize: 26,
-    fontWeight: "900",
-  },
-  cameraButton: {
-    position: "absolute",
-    right: -5,
-    bottom: -5,
-    width: 30,
-    height: 30,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  name: {
-    color: "#fff",
-    fontSize: 21,
-    fontWeight: "800",
-  },
-  email: {
-    color: "#888",
-    fontSize: 13,
-    marginTop: 4,
-  },
-  memberPill: {
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: "#f0c06018",
-    borderWidth: 1,
-    borderColor: "#f0c06044",
-  },
-  memberText: {
-    color: ACCENT,
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  notice: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#f0c06014",
-    borderColor: "#f0c06033",
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 12,
-  },
-  noticeText: {
-    flex: 1,
-    color: "#d7c28d",
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  balanceCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: ACCENT,
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 12,
-  },
-  balanceLabel: {
-    color: "#2d230b",
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  balanceAmount: {
-    color: BG,
-    fontSize: 29,
-    fontWeight: "900",
-    marginTop: 2,
-  },
-  topUpButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingHorizontal: 13,
-    paddingVertical: 11,
-  },
-  topUpText: {
-    color: BG,
-    fontWeight: "800",
-    fontSize: 13,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 22,
-  },
-  statCard: {
-    flex: 1,
-    minHeight: 100,
-    backgroundColor: CARD_BG,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: BORDER,
-    padding: 13,
-    justifyContent: "space-between",
-  },
-  statValue: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "800",
-  },
-  statLabel: {
-    color: "#888",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  section: {
-    marginBottom: 22,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  sectionTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "800",
-    marginBottom: 12,
-  },
-  viewAll: {
-    color: ACCENT,
-    fontSize: 13,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
-  actionsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  actionCard: {
-    width: "48%",
-    minHeight: 86,
-    backgroundColor: CARD_BG,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: BORDER,
-    padding: 14,
-    justifyContent: "space-between",
-  },
-  actionIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: SOFT_CARD,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionLabel: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  purchaseRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: CARD_BG,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: BORDER,
-    padding: 13,
-    marginBottom: 10,
-  },
-  purchaseIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
-    backgroundColor: SOFT_CARD,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  purchaseInfo: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  purchaseTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  purchaseMeta: {
-    color: "#777",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  purchasePrice: {
-    color: ACCENT,
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  menuRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: CARD_BG,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: BORDER,
-    padding: 13,
-    marginBottom: 10,
-  },
-  menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: SOFT_CARD,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  menuIconDanger: {
-    backgroundColor: "#ff444414",
-  },
-  menuText: {
-    flex: 1,
-  },
-  menuTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  dangerText: {
-    color: "#ff6666",
-  },
-  menuSubtitle: {
-    color: "#777",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  chevron: {
-    color: "#666",
-    fontSize: 28,
-    lineHeight: 28,
-  },
-});
