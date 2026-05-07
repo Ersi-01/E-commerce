@@ -1,16 +1,9 @@
-<<<<<<< HEAD
 import { Hamburger } from "lucide-react-native";
 import React, { useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { ShoppingCart, User, Menu, X } from "lucide-react-native";
-=======
-import { useFocusEffect, useRouter } from "expo-router";
-import { Menu, ShoppingCart, User, X } from "lucide-react-native";
-import React, { useCallback, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
->>>>>>> 1cc865f7fdf33807845e88217d539a0ce72f6c09
 
 import { getCart } from "@/app/storage/cartStorage";
 import S, { Colors, Shadows, Spacing } from "@/app/styles/global";
@@ -47,13 +40,9 @@ export default function Navbar({ search, setSearch }: Props) {
     >
       {/* TOP BAR */}
       <View style={S.rowBetween}>
-<<<<<<< HEAD
         <TouchableOpacity>
           <Hamburger />
         </TouchableOpacity>
-=======
-        <Text style={[S.subheading, { marginBottom: 0 }]}>🏪</Text>
->>>>>>> 1cc865f7fdf33807845e88217d539a0ce72f6c09
 
         <View style={[S.rowBetween, { gap: Spacing.sm }]}>
           {/* CART */}
