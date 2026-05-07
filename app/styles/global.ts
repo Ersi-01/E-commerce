@@ -274,6 +274,7 @@ const S = StyleSheet.create({
     borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
     height: 52,
+    marginBottom :5
   },
   inputError: {
     borderColor: Colors.danger,

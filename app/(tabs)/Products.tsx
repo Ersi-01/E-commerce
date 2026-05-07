@@ -7,6 +7,7 @@ import Navbar from "../components/Navbar";
 import { useWishlist } from "../context/WishlistContext";
 import products from "../data/products";
 import { addToCart } from "../storage/cartStorage";
+import Searchbar from "../components/Searchbar";
 
 type Product = {
   id: number;
@@ -145,6 +146,7 @@ export default function ProductsScreen() {
         </Text>
         <Filter onFilterChange={setFilters} />
       </View>
+      <Searchbar search={search} setSearch = {setSearch}/>
 
       {filteredProducts.length > 0 ? (
         <FlatList
