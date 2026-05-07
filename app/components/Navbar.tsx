@@ -39,7 +39,7 @@ export default function Navbar({ search, setSearch }: Props) {
       {/* TOP BAR */}
       <View style={S.rowBetween}>
         <Text style={[S.subheading, { marginBottom: 0 }]}>
-          ShopLogo
+          ShopApp
         </Text>
 
         <View style={[S.rowBetween, { gap: Spacing.lg }]}>

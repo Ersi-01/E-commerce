@@ -6,7 +6,8 @@ import { addToCart } from "../storage/cartStorage";
 import Filter, { FilterOptions } from "../components/Filter";
 import S from "@/app/styles/global";
 import { useRef, useState, useMemo } from "react";
-import Searchbar from "../components/Searchbar";
+import Navbar from "../components/Navbar";
+
 type Product = {
   id: number;
   name: string;
@@ -21,6 +22,7 @@ type Product = {
 export default function ProductsScreen() {
   const { addToWishlist, isInWishlist } = useWishlist();
   const [toastMessage, setToastMessage] = useState("");
+  const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<FilterOptions>({
     category: "All",
     sortBy: null,
@@ -28,27 +30,21 @@ export default function ProductsScreen() {
   });
   const opacity = useRef(new Animated.Value(0)).current;
 
-  const[search,setSearch] =useState('')
-
-  // Filter dhe sortim logjika
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-
     result = result.filter((item) =>
-  item.name.toLowerCase().includes(search.toLowerCase())
-);
-    // Filter by category
+      item.name.toLowerCase().includes(search.toLowerCase())
+    );
+
     if (filters.category !== "All") {
-      result = result.filter(p => p.category === filters.category);
+      result = result.filter((p) => p.category === filters.category);
     }
 
-    // Filter by stock
     if (filters.inStockOnly) {
-      result = result.filter(p => p.inStock);
+      result = result.filter((p) => p.inStock);
     }
 
-    // Sort by price
     if (filters.sortBy === "price_asc") {
       result.sort((a, b) => a.price - b.price);
     } else if (filters.sortBy === "price_desc") {
@@ -56,7 +52,7 @@ export default function ProductsScreen() {
     }
 
     return result;
-  }, [filters ,search]);
+  }, [filters, search]);
 
   function showToast(message: string) {
     setToastMessage(message);
@@ -68,7 +64,11 @@ export default function ProductsScreen() {
   }
 
   const renderItem = ({ item }: { item: Product }) => (
-    <TouchableOpacity onPress={() => router.push({ pathname: "/productdetails", params: { id: item.id } })}>
+    <TouchableOpacity
+      onPress={() =>
+        router.push({ pathname: "/productdetails", params: { id: item.id } })
+      }
+    >
       <View style={S.card}>
         <Text style={S.subheading}>{item.name}</Text>
         <Text style={S.label}>{item.category}</Text>
@@ -82,7 +82,11 @@ export default function ProductsScreen() {
         <TouchableOpacity
           style={[S.btnSecondary, !item.inStock && S.btnDisabled]}
           disabled={!item.inStock}
-          onPress={(e) => { e.stopPropagation(); addToCart(item); showToast(`${item.name} added to cart!`); }}
+          onPress={(e) => {
+            e.stopPropagation();
+            addToCart(item);
+            showToast(`${item.name} added to cart!`);
+          }}
         >
           <Text style={S.btnSecondaryText}>
             {item.inStock ? "Add to Cart" : "Unavailable"}
@@ -91,7 +95,10 @@ export default function ProductsScreen() {
 
         <TouchableOpacity
           style={[S.btnChip, isInWishlist(item.id) && S.btnDisabled]}
-          onPress={(e) => { e.stopPropagation(); addToWishlist(item); }}
+          onPress={(e) => {
+            e.stopPropagation();
+            addToWishlist(item);
+          }}
           disabled={isInWishlist(item.id)}
         >
           <Text style={S.btnChipText}>
@@ -104,13 +111,22 @@ export default function ProductsScreen() {
 
   return (
     <View style={S.screen}>
-      <View style={[S.screenHeader, { justifyContent: "space-between" }]}>
-        <Text style={S.heading}>Products</Text>
-       
+      {/* Navbar — handles search bar, cart icon, profile icon, and dropdown nav */}
+      <Navbar search={search} setSearch={setSearch} />
+
+      {/* Filter row — sits below the navbar */}
+      <View
+        style={[
+          S.screenHeader,
+          { justifyContent: "space-between", marginTop: 8 },
+        ]}
+      >
+        <Text style={S.label}>
+          {filteredProducts.length}{" "}
+          {filteredProducts.length === 1 ? "product" : "products"}
+        </Text>
         <Filter onFilterChange={setFilters} />
-       
       </View>
-        <Searchbar search={search} setSearch={setSearch}/>
 
       {/* Products list */}
       {filteredProducts.length > 0 ? (
@@ -125,17 +141,21 @@ export default function ProductsScreen() {
       )}
 
       {/* Toast notification */}
-      <Animated.View style={{
-        opacity,
-        position: "absolute",
-        bottom: 30,
-        alignSelf: "center",
-        backgroundColor: "#333",
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 24,
-      }}>
-        <Text style={{ color: "#fff", fontSize: 14, fontWeight: "600" }}>{toastMessage}</Text>
+      <Animated.View
+        style={{
+          opacity,
+          position: "absolute",
+          bottom: 30,
+          alignSelf: "center",
+          backgroundColor: "#333",
+          paddingHorizontal: 20,
+          paddingVertical: 12,
+          borderRadius: 24,
+        }}
+      >
+        <Text style={{ color: "#fff", fontSize: 14, fontWeight: "600" }}>
+          {toastMessage}
+        </Text>
       </Animated.View>
     </View>
   );
