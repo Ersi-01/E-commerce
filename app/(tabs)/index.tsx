@@ -1,10 +1,11 @@
-import { Heart, BookHeart } from "lucide-react-native";
+import { Heart, BookHeart, Star } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useWishlist } from "../context/WishlistContext";
@@ -13,10 +14,19 @@ import S from "@/app/styles/global";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 
+
 export default function HomeScreen() {
   const router = useRouter();
   const { wishlist } = useWishlist();
   const [search, setSearch] = useState("");
+
+  const favProducts = [
+    { id: 1, pName: "StreetCore Oversized Hoodie", price: 65, category: "Hoodies", rating: 4.3, stock: 12, inStock: true, description: "Heavy oversized hoodie with soft streetwear cotton blend." },
+    { id: 2, pName: "UrbanFlex Cargo Pants", price: 55, category: "Pants", rating: 4.1, stock: 0, inStock: false, description: "Slim cargo pants with utility pockets." },
+    { id: 3, pName: "NeoWave Graphic Tee", price: 25, category: "T-Shirts", rating: 4.5, stock: 34, inStock: true, description: "Futuristic neon graphic cotton tee." },
+    { id: 4, pName: "CloudStep Joggers", price: 50, category: "Pants", rating: 4.2, stock: 7, inStock: true, description: "Ultra-soft joggers for daily comfort." },
+    { id: 5, pName: "Midnight Drift Jacket", price: 90, category: "Jackets", rating: 4.6, stock: 5, inStock: true, description: "Dark matte wind-resistant jacket." }
+  ]
 
   return (
     <View style={{ flex: 1 }}>
@@ -151,28 +161,41 @@ export default function HomeScreen() {
         {/* Quick Access */}
         <Text style={S.sectionTitle}>Quick Access</Text>
 
-        <View style={S.rowWrap}>
-          <TouchableOpacity
-            style={[S.card, {
+        <View style={[S.card, {
               flex: 1,
               minWidth: "45%",
               gap: Spacing.xs,
-            }]}
-            onPress={() => router.push("/(tabs)/Products")}
-            activeOpacity={0.75}
-          >
+            }]}>
+            
             <BookHeart color={"red"} />
-            <Text style={S.subheading}>Favorite Products</Text>
-            <Text style={S.caption}>Browse all products</Text>
-            <Text style={{
-              color: Colors.textDim,
-              fontSize: Typography.lg,
-              fontWeight: Typography.bold,
-              marginTop: Spacing.sm,
-            }}>
-              →
-            </Text>
-          </TouchableOpacity>
+            <Text style={S.subheading}>Popular Products</Text>
+            <Text style={S.caption}>Most wishlisted products around the world</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: Spacing.sm, gap: Spacing.sm }}>
+              {favProducts.map((item) => (
+                <View key={item.id} style={[S.cardElevated, {
+                  width: 250,
+                  height: 350,
+                  margin: 10,
+                  padding: 7,
+                }]}>
+                  <Text style={[S.label, { fontSize: Typography.xl }]}>{item.pName}</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: Spacing.xs }}>
+                    <Star color="gold" fill="gold" size={16}/>
+                    <Text>{item.rating}</Text>
+                    <Text style={[S.caption, {color: item.inStock ? 'blue' : 'red'}]}>
+                      {item.inStock ? "In Stock" : "Out of Stock"}
+                    </Text>
+                  </View>
+                  <Text style={S.price}>${item.price}</Text>
+
+                  <View style={{backgroundColor: 'gray', width: 200, height: 200, margin: 'auto'}}>
+                    <Text style={{color: 'white', textAlign: 'center', marginTop: 90, fontSize: Typography.xxl }}>Image not found</Text>
+                  </View>
+
+                </View>
+              ))}
+            </ScrollView>
+
         </View>
 
         <Footer />
