@@ -44,7 +44,7 @@ export default function Wishlist() {
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 8,
-        marginLeft: 12,
+        marginRight: 50,
       }}
       onPress={() => {
         removeFromWishlist(item.id);

@@ -124,7 +124,7 @@ export default function RegisterScreen() {
           ]}
         >
           <View style={styles.header}>
-            <Text style={styles.brandName}>ShopWave</Text>
+            <Text style={styles.brandName}>ShopApp</Text>
             <Text style={S.caption}>Create your account</Text>
           </View>
 
