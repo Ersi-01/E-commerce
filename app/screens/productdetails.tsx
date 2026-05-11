@@ -27,9 +27,12 @@ export default function ProductDetails() {
     checkCart();
   }, [id]);
 
-  function goToProduct(productId: number) {
-    router.push(`/productdetails/${productId}`);
-  }
+function goToProduct(productId: number) {
+  router.push({
+    pathname: "/productdetails/[id]" as any,
+    params: { id: productId },
+  });
+}
 
   async function handleAddToCart() {
     if (!product) return;
