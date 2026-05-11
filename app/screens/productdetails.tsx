@@ -9,9 +9,8 @@ import S, { Spacing, Colors, Radius, Typography } from "@/app/styles/global";
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
-  const product = products.find((p) => p.id === Number(id));
-
   const currentId = Number(id);
+  const product = products.find((p) => p.id === currentId);
   const prevProduct = products.find((p) => p.id === currentId - 1);
   const nextProduct = products.find((p) => p.id === currentId + 1);
 
