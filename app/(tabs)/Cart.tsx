@@ -1,46 +1,66 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
-import { useEffect, useState, useCallback } from "react";
-import {
-  getCart,
-  removeFromCart,
-  increaseCount,
-  decreaseCount,
-} from "../storage/cartStorage";
-import { useFocusEffect, router } from "expo-router";
+import { View, Text, Pressable, ScrollView } from "react-native"
 
-import S, { Spacing } from "@/app/styles/global";
-import Footer from "../components/Footer";
+import { router } from "expo-router"
+
+import S, { Spacing } from "@/app/styles/global"
+
+import Footer from "../components/Footer"
+
+import { useCartStore } from "@/app/store/cartStore"
 
 export default function Cart() {
-  const [cartProducts, setCartProducts] = useState([]);
+  // Zustand state
+  const cartProducts = useCartStore((state) => state.cart)
 
-  useFocusEffect(
-    useCallback(() => {
-      loadCart();
-    }, []),
-  );
+  const removeFromCart = useCartStore((state) => state.removeFromCart)
 
-  async function loadCart() {
-    const data = await getCart();
-    setCartProducts(data);
+  const addToCart = useCartStore((state) => state.addToCart)
+
+  // Increase quantity
+  function increaseCount(product) {
+    addToCart(product)
   }
 
-  useEffect(() => {
-    loadCart();
-  }, []);
+  // Decrease quantity
+  function decreaseCount(id) {
+    const itemIndex = cartProducts.findIndex((item) => item.id === id)
 
-  async function handleRemove(id) {
-    await removeFromCart(id);
-    loadCart();
+    if (itemIndex === -1) return
+
+    const updatedCart = [...cartProducts]
+
+    updatedCart.splice(itemIndex, 1)
+
+    useCartStore.setState({
+      cart: updatedCart,
+    })
   }
 
-  const totalPrice = cartProducts.reduce((total, product) => {
-    return total + product.price * (product.count || 1);
-  }, 0);
+  // Group products by id
+  const groupedCart = cartProducts.reduce((acc, item) => {
+    const existing = acc.find((p) => p.id === item.id)
 
-  if (cartProducts.length > 0) {
+    if (existing) {
+      existing.count += 1
+    } else {
+      acc.push({
+        ...item,
+        count: 1,
+      })
+    }
+
+    return acc
+  }, [])
+
+  // Total price
+  const totalPrice = groupedCart.reduce((total, product) => {
+    return total + product.price * product.count
+  }, 0)
+
+  if (groupedCart.length > 0) {
     return (
       <View style={[S.screen, { flex: 1 }]}>
+        {/* TOP BAR */}
         <View
           style={{
             position: "absolute",
@@ -51,8 +71,6 @@ export default function Cart() {
             backgroundColor: "#f6f7fb",
             padding: 15,
             paddingTop: 0,
-            borderBottomWidth: 1,
-            borderBottomColor: "#ffffff00",
           }}
         >
           <Text
@@ -67,6 +85,7 @@ export default function Cart() {
           >
             Total: ${totalPrice.toFixed(2)}
           </Text>
+
           <Pressable
             style={S.btnPrimary}
             onPress={() => router.push("/screens/checkout")}
@@ -75,6 +94,7 @@ export default function Cart() {
           </Pressable>
         </View>
 
+        {/* CART LIST */}
         <ScrollView
           contentContainerStyle={{
             paddingTop: 80,
@@ -97,14 +117,16 @@ export default function Cart() {
           </Text>
 
           <View style={{ width: "100%" }}>
-            {cartProducts.map((product) => (
+            {groupedCart.map((product) => (
               <View key={product.id} style={S.card}>
-                <Pressable onPress={() => handleRemove(product.id)}>
+                {/* REMOVE */}
+                <Pressable onPress={() => removeFromCart(product.id)}>
                   <Text style={S.btnDangerText}>Remove</Text>
                 </Pressable>
 
                 <Text style={S.subheading}>{product.name}</Text>
 
+                {/* QUANTITY */}
                 <View
                   style={{
                     flexDirection: "row",
@@ -119,39 +141,54 @@ export default function Cart() {
                     gap: 12,
                   }}
                 >
+                  {/* MINUS */}
                   <Pressable
-                    onPress={async () => {
-                      await decreaseCount(product.id);
-                      loadCart();
-                    }}
+                    onPress={() => decreaseCount(product.id)}
                     style={{
                       paddingHorizontal: 10,
                       paddingVertical: 2,
                     }}
                   >
-                    <Text style={{ fontSize: 18, fontWeight: "600" }}>−</Text>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "600",
+                      }}
+                    >
+                      −
+                    </Text>
                   </Pressable>
 
-                  <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                    {product.count || 1}
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {product.count}
                   </Text>
 
+                  {/* PLUS */}
                   <Pressable
-                    onPress={async () => {
-                      await increaseCount(product.id);
-                      loadCart();
-                    }}
+                    onPress={() => increaseCount(product)}
                     style={{
                       paddingHorizontal: 10,
                       paddingVertical: 2,
                     }}
                   >
-                    <Text style={{ fontSize: 18, fontWeight: "600" }}>+</Text>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "600",
+                      }}
+                    >
+                      +
+                    </Text>
                   </Pressable>
                 </View>
 
                 <Text style={S.price}>
-                  Price: ${(product.price * (product.count || 1)).toFixed(2)}
+                  Price: ${(product.price * product.count).toFixed(2)}
                 </Text>
               </View>
             ))}
@@ -162,9 +199,10 @@ export default function Cart() {
           </View>
         </ScrollView>
       </View>
-    );
+    )
   }
 
+  // EMPTY CART
   return (
     <View style={[S.screen, { flex: 1 }]}>
       <Text
@@ -192,5 +230,5 @@ export default function Cart() {
 
       <Footer />
     </View>
-  );
+  )
 }

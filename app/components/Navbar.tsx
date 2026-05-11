@@ -1,68 +1,76 @@
-import { Store  } from "lucide-react-native";
-import React, { useState, useCallback } from "react";
-import { useRouter } from "expo-router";
-import { View, Text, TouchableOpacity } from "react-native";
-import { useFocusEffect } from "expo-router";
-import { ShoppingCart, User, Menu, X } from "lucide-react-native";
+import React, { useState } from "react"
+import { View, Text, TouchableOpacity } from "react-native"
+import { useRouter } from "expo-router"
+import { Store, ShoppingCart, User, Menu, X } from "lucide-react-native"
 
-import { getCart } from "@/app/storage/cartStorage";
-import S, { Colors, Shadows, Spacing } from "@/app/styles/global";
+import { useCartStore } from "@/app/store/cartStore"
+
+import S, { Colors, Shadows, Spacing } from "@/app/styles/global"
 
 type Props = {
-  search: string;
-  setSearch: (value: string) => void;
-};
+  search: string
+  setSearch: (value: string) => void
+}
 
 export default function Navbar({ search, setSearch }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false)
 
-  const router = useRouter();
+  const router = useRouter()
 
-  useFocusEffect(
-    useCallback(() => {
-      loadCartCount();
-    }, []),
-  );
-
-  async function loadCartCount() {
-    const cart = await getCart();
-    setCartCount(cart?.length ?? 0);
-  }
+  
+const cart = useCartStore((state) => state.cart ?? [])
+const cartCount = cart.length
 
   return (
     <View
       style={[
         S.card,
-        { padding: Spacing.sm, margin: Spacing.lg },
+        {
+          padding: Spacing.sm,
+          margin: Spacing.lg,
+        },
         Shadows.card,
       ]}
     >
       {/* TOP BAR */}
       <View style={S.rowBetween}>
+        {/* HOME */}
         <TouchableOpacity onPress={() => router.push("/(tabs)")}>
-          <Store  />
+          <Store color={Colors.textPrimary} size={24} />
         </TouchableOpacity>
 
         <View style={[S.rowBetween, { gap: Spacing.sm }]}>
-          {/* CART */}
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/Cart")}
             activeOpacity={0.7}
           >
             <View style={{ position: "relative" }}>
-              <ShoppingCart color={Colors.textPrimary} size={22} />
+              <ShoppingCart color={Colors.textPrimary} size={24} />
 
-              {cartCount > 0 && (
-                <View
-                  style={[
-                    S.badge,
-                    { position: "absolute", top: -6, right: -8 },
-                  ]}
+              <View
+                style={{
+                  position: "absolute",
+                  top: -8,
+                  right: -10,
+                  backgroundColor: "red",
+                  minWidth: 18,
+                  height: 18,
+                  borderRadius: 9,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingHorizontal: 4,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 11,
+                    fontWeight: "bold",
+                  }}
                 >
-                  <Text style={S.badgeText}>{cartCount}</Text>
-                </View>
-              )}
+                  {cartCount}
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
 
@@ -87,8 +95,8 @@ export default function Navbar({ search, setSearch }: Props) {
         <View style={{ marginTop: Spacing.sm }}>
           <Text
             onPress={() => {
-              setIsOpen(false);
-              router.push("/(tabs)/Products");
+              setIsOpen(false)
+              router.push("/(tabs)/Products")
             }}
             style={[S.body, { paddingVertical: Spacing.sm }]}
           >
@@ -97,8 +105,8 @@ export default function Navbar({ search, setSearch }: Props) {
 
           <Text
             onPress={() => {
-              setIsOpen(false);
-              router.push("/catalogue");
+              setIsOpen(false)
+              router.push("/catalogue")
             }}
             style={[S.body, { paddingVertical: Spacing.sm }]}
           >
@@ -107,8 +115,8 @@ export default function Navbar({ search, setSearch }: Props) {
 
           <Text
             onPress={() => {
-              setIsOpen(false);
-              router.push("/wishlist");
+              setIsOpen(false)
+              router.push("/wishlist")
             }}
             style={[S.body, { paddingVertical: Spacing.sm }]}
           >
@@ -117,8 +125,8 @@ export default function Navbar({ search, setSearch }: Props) {
 
           <Text
             onPress={() => {
-              setIsOpen(false);
-              router.push("/(tabs)/Profile");
+              setIsOpen(false)
+              router.push("/(tabs)/Profile")
             }}
             style={[S.body, { paddingVertical: Spacing.sm }]}
           >
@@ -127,5 +135,5 @@ export default function Navbar({ search, setSearch }: Props) {
         </View>
       )}
     </View>
-  );
+  )
 }
