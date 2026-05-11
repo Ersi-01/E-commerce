@@ -6,15 +6,16 @@ import Navbar  from "@/app/components/Navbar"
 
 import { HapticTab } from "@/components/haptic-tab"
 import { IconSymbol } from "@/components/ui/icon-symbol"
-import { Colors } from "@/constants/theme"
-import { useColorScheme } from "@/hooks/use-color-scheme"
+import { getColors } from "@/app/styles/global"
+import { useTheme } from "@/app/context/ThemeContext"
 
 /* ---------------- FOOTER COMPONENT ---------------- */
 
 
 /* ---------------- MAIN LAYOUT ---------------- */
 export default function TabLayout() {
-  const colorScheme = useColorScheme()
+  const { isDark } = useTheme();
+  const Colors = getColors(isDark);
   const [search, setSearch] = useState("")
 
   return (
@@ -25,7 +26,7 @@ export default function TabLayout() {
       {/* TABS */}
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+          tabBarActiveTintColor: Colors.accent,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarStyle: { display: "none" },

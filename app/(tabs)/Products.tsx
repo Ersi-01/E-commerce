@@ -6,6 +6,7 @@ import { Animated, FlatList, StyleSheet, Text, TouchableOpacity, View } from "re
 import Filter, { FilterOptions } from "../components/Filter"
 import Searchbar from "../components/Searchbar"
 import { useWishlist } from "../context/WishlistContext"
+import { useTheme } from "../context/ThemeContext"
 import products from "../data/products"
 import { useCartStore } from "@/app/store/cartStore"
 import { Heart, ShoppingBag, Tag } from "lucide-react-native"
@@ -22,6 +23,7 @@ type Product = {
 }
 
 export default function ProductsScreen() {
+  useTheme();
   const params = useLocalSearchParams()
   const { addToWishlist, isInWishlist } = useWishlist()
   const addToCart = useCartStore((state) => state.addToCart)

@@ -1,11 +1,13 @@
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native"
 import { router } from "expo-router"
 import S, { Colors, Spacing, Radius, Typography } from "@/app/styles/global"
+import { useTheme } from "../context/ThemeContext"
 import Footer from "../components/Footer"
 import { useCartStore } from "@/app/store/cartStore"
 import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react-native"
 
 export default function Cart() {
+  useTheme();
   const cartProducts = useCartStore((state) => state.cart)
   const removeFromCart = useCartStore((state) => state.removeFromCart)
   const addToCart = useCartStore((state) => state.addToCart)

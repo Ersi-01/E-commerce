@@ -1,11 +1,12 @@
 /**
- * Import tokens:   import { Colors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
+ * Import tokens:   import { getColors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
  * Import styles:   import S from "@/app/styles/global";
  */
 
 import { StyleSheet } from "react-native";
 
-export const Colors = {
+// Light theme colors
+const LIGHT_COLORS = {
   bg:           "#f8f9fc",
   bgAlt:        "#f0f2f8",
   card:         "#ffffff",
@@ -38,6 +39,52 @@ export const Colors = {
   navBg:        "#ffffff",
   navBorder:    "#e4e8f0",
 };
+
+// Dark theme colors
+const DARK_COLORS = {
+  bg:           "#0f172a",
+  bgAlt:        "#1e293b",
+  card:         "#1e293b",
+  input:        "#334155",
+  border:       "#475569",
+  borderLight:  "#64748b",
+
+  textPrimary:  "#f1f5f9",
+  textSecondary:"#cbd5e1",
+  textMuted:    "#94a3b8",
+  textDim:      "#78909c",
+
+  accent:       "#818cf8",
+  accentLight:  "#4c1d95",
+  accentDark:   "#e0e7ff",
+  accentMid:    "#a5b4fc",
+
+  success:      "#10b981",
+  successBg:    "#064e3b",
+  danger:       "#ef4444",
+  dangerBg:     "#7f1d1d",
+  dangerBorder: "#991b1b",
+
+  gold:         "#fbbf24",
+  goldBg:       "#78350f",
+
+  blobGold:     "#f59e0b20",
+  blobBlue:     "#3b82f620",
+
+  navBg:        "#1e293b",
+  navBorder:    "#334155",
+};
+
+// Export both palettes directly
+export { LIGHT_COLORS, DARK_COLORS };
+
+// Helper function to get colors based on theme
+export function getColors(isDark: boolean) {
+  return isDark ? DARK_COLORS : LIGHT_COLORS;
+}
+
+// For backwards compatibility with existing code
+export const Colors = LIGHT_COLORS;
 
 export const Spacing = {
   xs:   4,
@@ -115,6 +162,8 @@ export const Shadows = {
     elevation: 10,
   },
 };
+
+  
 
 const S = StyleSheet.create({
   screen: {
