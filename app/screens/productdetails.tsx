@@ -57,7 +57,6 @@ export default function ProductDetails() {
 
   return (
     <ScrollView contentContainerStyle={S.screen} showsVerticalScrollIndicator={false}>
-      {/* Header with Back Button */}
       <View style={[S.screenHeader, { marginBottom: Spacing.lg }]}>
         <Text style={S.heading}>Product Details</Text>
         <TouchableOpacity
@@ -68,7 +67,7 @@ export default function ProductDetails() {
         </TouchableOpacity>
       </View>
 
-      {/* Product Info Card */}
+  
       <View style={[S.cardElevated, { gap: Spacing.md, marginBottom: Spacing.lg }]}>
         <DetailRow label="ID" value={product.id} />
         <DetailRow label="Name" value={product.name} />
@@ -87,7 +86,6 @@ export default function ProductDetails() {
         />
       </View>
 
-      {/* Add to Cart Button */}
       <TouchableOpacity
         style={[
           S.btnPrimary,
