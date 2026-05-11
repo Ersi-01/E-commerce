@@ -13,6 +13,7 @@
     StatusBar,
   } from 'react-native';
   import { useRouter } from 'expo-router';
+  import { supabase } from '../utils/supabase';
   import { Colors, Spacing, Radius, Typography } from '@/app/styles/global';
   import S from '@/app/styles/global';
   import storage from '@/app/utils/storage';
@@ -56,16 +57,16 @@
     }, []);
 
     const checkExistingUser = async () => {
-      try {
-        const saved = await storage.get('@ecommerce_session');
-
-        if (saved) {
-          router.replace('/(tabs)' as any);
-        }
-      } catch (e) {
-        console.log('Storage error', e);
-      }
-    };
+  try {
+    await storage.remove('@ecommerce_session'); // add this to clear old session
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      router.replace('/(tabs)' as any);
+    }
+  } catch (e) {
+    console.log('Storage error', e);
+  }
+};
 
     const triggerShake = () => {
       Animated.sequence([
@@ -118,57 +119,33 @@
     };
 
     const handleLogin = async () => {
-      if (!validate()) {
-        triggerShake();
-        return;
-      }
+  if (!validate()) {
+    triggerShake();
+    return;
+  }
 
-      setLoading(true);
+  setLoading(true);
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      try {
-        const saved = await storage.get('@ecommerce_user');
+    if (error) {
+      setErrors({ email: error.message });
+      triggerShake();
+      return;
+    }
 
-        if (!saved) {
-          setErrors({
-            email: 'No account found. Please register first.',
-          });
+    await new Promise(res => setTimeout(res, 1500));
+    router.replace('/(tabs)' as any);
 
-          triggerShake();
-          return;
-        }
-
-        const user = JSON.parse(saved);
-
-        if (user.email !== email) {
-          setErrors({
-            email: 'Email does not match our records.',
-          });
-
-          triggerShake();
-          return;
-        }
-
-        if (user.password !== password) {
-          setErrors({
-            password: 'Incorrect password.',
-          });
-
-          triggerShake();
-          return;
-        }
-
-        await storage.set('@ecommerce_session', JSON.stringify(user));
-
-        await new Promise(res => setTimeout(res, 1500));
-
-        router.replace('/(tabs)');
-
-      } catch (e) {
-        console.log('Login error', e);
-      } finally {
-        setLoading(false);
-      }
-    };
+  } catch (e) {
+    console.log('Login error', e);
+  } finally {
+    setLoading(false);
+  }
+};
 
     return (
       <KeyboardAvoidingView
@@ -268,7 +245,7 @@
                     secureTextEntry={!showPassword}
                     returnKeyType="done"
                     onSubmitEditing={handleLogin}
-                  />
+                  />  
 
                   <TouchableOpacity
                     onPress={() =>

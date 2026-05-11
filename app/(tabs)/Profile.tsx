@@ -22,7 +22,7 @@ import {
   View,
 } from "react-native"
 import { useRouter } from "expo-router"
-
+import { supabase } from "../utils/supabase"
 import Navbar from "@/app/components/Navbar"
 import { useWishlist } from "../context/WishlistContext"
 import S, { Colors, Radius, Spacing, Typography } from "@/app/styles/global"
@@ -45,32 +45,28 @@ export default function Profile() {
   }, [])
 
   const loadProfile = async () => {
-    try {
-      const savedUser = await storage.get("@ecommerce_session")
-
-      if (savedUser) {
-        const user = JSON.parse(savedUser)
-        if (user.email) setEmail(user.email)
-        if (user.name) setName(user.name)
-      }
-
-      const savedBalance = await storage.get("@user_balance")
-
-      if (savedBalance) {
-        setBalance(Number(savedBalance))
-      } else {
-        await storage.set("@user_balance", "0")
-      }
-
-      const savedOrders = await storage.get("@user_orders")
-
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders))
-      }
-    } catch (err) {
-      console.log(err)
+  try {
+    const { data } = await supabase.auth.getUser();
+    if (data.user) {
+      setEmail(data.user.email ?? '');
+      setName(data.user.user_metadata?.name ?? '');
     }
+
+    const savedBalance = await storage.get("@user_balance");
+    if (savedBalance) {
+      setBalance(Number(savedBalance));
+    } else {
+      await storage.set("@user_balance", "0");
+    }
+
+    const savedOrders = await storage.get("@user_orders");
+    if (savedOrders) {
+      setOrders(JSON.parse(savedOrders));
+    }
+  } catch (err) {
+    console.log(err);
   }
+};
 
   const displayName = useMemo(() => {
     if (name) return name
@@ -112,9 +108,9 @@ export default function Profile() {
   }
 
   const handleSignOut = async () => {
-    await storage.remove("@ecommerce_session")
-    router.replace("/login" as any)
-  }
+    await supabase.auth.signOut();
+    router.replace('/login' as any);
+};
 
   return (
     <View

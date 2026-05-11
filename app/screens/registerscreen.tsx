@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   StatusBar,
 } from 'react-native';
+import { supabase } from '../utils/supabase';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Typography } from '@/app/styles/global';
 import S from '@/app/styles/global';
@@ -92,18 +93,29 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      const userData = { name, email, password }
-      await storage.set('@ecommerce_session', JSON.stringify(userData))
-      await storage.set('@ecommerce_session', JSON.stringify(userData))
-      await new Promise(res => setTimeout(res, 1500));
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name }
+        }
+      });
 
-      router.replace('/(tabs)');
+      if (error) {
+        setErrors({ email: error.message });
+        triggerShake();
+        return; 
+      }
+
+      await new Promise(res => setTimeout(res, 1500));
+      router.replace('/(tabs)' as any);
+
     } catch (e) {
       console.log('Register error', e);
     } finally {
       setLoading(false);
     }
-  };
+};
 
   return (  
     <KeyboardAvoidingView
