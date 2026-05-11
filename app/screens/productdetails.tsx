@@ -9,9 +9,8 @@ import S, { Spacing, Colors } from "@/app/styles/global";
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
-  const product = products.find((p) => p.id === Number(id));
-
   const currentId = Number(id);
+  const product = products.find((p) => p.id === currentId);
   const prevProduct = products.find((p) => p.id === currentId - 1);
   const nextProduct = products.find((p) => p.id === currentId + 1);
 
@@ -78,15 +77,8 @@ function goToProduct(productId: number) {
         <DetailRow label="Description" value={product.description} />
         <DetailRow label="Rating" value={`⭐ ${product.rating}`} />
         <DetailRow label="Price" value={`€${product.price}`} />
-        <DetailRow 
-          label="Stock" 
-          value={product.inStock ? `${product.stock} available` : "Out of Stock"} 
-        />
-        <DetailRow 
-          label="Status" 
-          value={product.inStock ? "In Stock" : "Out of Stock"}
-          highlight={!product.inStock}
-        />
+        <DetailRow label="Stock" value={product.inStock ? `${product.stock} available` : "Out of Stock"} />
+        <DetailRow label="Status" value={product.inStock ? "In Stock" : "Out of Stock"} highlight={!product.inStock}/>
       </View>
 
       <TouchableOpacity
