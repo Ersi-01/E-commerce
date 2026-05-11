@@ -93,8 +93,10 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       const userData = { name, email, password }
-      await storage.set('@ecommerce_user', JSON.stringify(userData))
       await storage.set('@ecommerce_session', JSON.stringify(userData))
+      await storage.set('@ecommerce_session', JSON.stringify(userData))
+      await new Promise(res => setTimeout(res, 1500));
+
       router.replace('/(tabs)');
     } catch (e) {
       console.log('Register error', e);
@@ -103,7 +105,7 @@ export default function RegisterScreen() {
     }
   };
 
-  return (
+  return (  
     <KeyboardAvoidingView
       style={S.screenNoPad}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
