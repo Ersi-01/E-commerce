@@ -1,4 +1,4 @@
-import { Hamburger } from "lucide-react-native";
+import { Store  } from "lucide-react-native";
 import React, { useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { View, Text, TouchableOpacity } from "react-native";
@@ -40,8 +40,8 @@ export default function Navbar({ search, setSearch }: Props) {
     >
       {/* TOP BAR */}
       <View style={S.rowBetween}>
-        <TouchableOpacity onPress={() => router.push("/(tabs)/")}>
-          <Hamburger />
+        <TouchableOpacity onPress={() => router.push("/(tabs)")}>
+          <Store  />
         </TouchableOpacity>
 
         <View style={[S.rowBetween, { gap: Spacing.sm }]}>

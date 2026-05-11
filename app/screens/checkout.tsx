@@ -1,10 +1,16 @@
 import { useState, useCallback } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, Alert, ActivityIndicator, StatusBar, Modal } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, StatusBar, Modal } from "react-native";
 import { WebView } from "react-native-webview";
 import { useFocusEffect } from "expo-router";
 import { getCart, saveCart } from "@/app/storage/cartStorage";
 import S, { Colors, Spacing, Radius, Typography } from "@/app/styles/global";
 import Navbar from "@/app/components/Navbar";
+
+const PAYPAL_CLIENT_ID = "BAAoqXZHnRJIO1LikgimdZZRvJSLy4kLJ1U1S1W9wqMhz0NS-NK9-4SLk9bJfSYYFNvBirXqlIMW3PwIKY";
+const PAYPAL_SECRET = "ENBWlSMd0kODUkd3-n4yd4kqQDqDc3t8fTgOis1NfPEDoGAwWlRSGwb9TxnzwdWZJ4xaFevd2MHjeQ47";
+const PAYPAL_BASE = "https://api-m.sandbox.paypal.com";
+const RETURN_URL = "https://example.com/paypal-return";
+const CANCEL_URL = "https://example.com/paypal-cancel";
 
 type Product = {
 	id: string;
@@ -13,72 +19,51 @@ type Product = {
 	count?: number;
 };
 
-type ShippingForm = {
-	name: string;
-	address: string;
-	city: string;
-};
+async function getAccessToken(): Promise<string> {
+	const credentials = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`);
+	const res = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
+		method: "POST",
+		headers: {
+			Authorization: `Basic ${credentials}`,
+			"Content-Type": "application/x-www-form-urlencoded",
+		},
+		body: "grant_type=client_credentials",
+	});
+	const data = await res.json();
+	return data.access_token;
+}
 
-function buildPaypalHTML(total: string): string {
-	return `
-		<html>
-		<head>
-			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<script src="https://www.paypal.com/sdk/js?client-id=BAAoqXZHnRJIO1LikgimdZZRvJSLy4kLJ1U1S1W9wqMhz0NS-NK9-4SLk9bJfSYYFNvBirXqlIMW3PwIKY&currency=USD"></script>
-			<style>
-				* { box-sizing: border-box; margin: 0; padding: 0; }
-				body {
-					background: #f6f7fb;
-					padding: 24px 16px;
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-					font-family: sans-serif;
-				}
-				.label {
-					font-size: 11px;
-					font-weight: 600;
-					color: #64748b;
-					letter-spacing: 0.8px;
-					text-transform: uppercase;
-					margin-bottom: 6px;
-				}
-				.total {
-					font-size: 30px;
-					font-weight: 800;
-					color: #4f46e5;
-					margin-bottom: 32px;
-				}
-				#paypal-button-container { width: 100%; max-width: 400px; }
-			</style>
-		</head>
-		<body>
-			<p class="label">Total due</p>
-			<p class="total">$${total}</p>
-			<div id="paypal-button-container"></div>
-			<script>
-				paypal.Buttons({
-					createOrder: function(data, actions) {
-						return actions.order.create({
-							purchase_units: [{ amount: { value: '${total}' } }]
-						});
-					},
-					onApprove: function(data, actions) {
-						return actions.order.capture().then(function(details) {
-							window.ReactNativeWebView.postMessage(JSON.stringify({ success: true, details }));
-						});
-					},
-					onError: function(err) {
-						window.ReactNativeWebView.postMessage(JSON.stringify({ success: false, error: String(err) }));
-					},
-					onCancel: function() {
-						window.ReactNativeWebView.postMessage(JSON.stringify({ success: false, cancelled: true }));
-					}
-				}).render('#paypal-button-container');
-			</script>
-		</body>
-		</html>
-	`;
+async function createOrder(total: string, accessToken: string): Promise<{ approvalUrl: string; orderId: string }> {
+	const res = await fetch(`${PAYPAL_BASE}/v2/checkout/orders`, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			intent: "CAPTURE",
+			purchase_units: [{ amount: { currency_code: "USD", value: total } }],
+			application_context: {
+				return_url: RETURN_URL,
+				cancel_url: CANCEL_URL,
+				shipping_preference: "NO_SHIPPING",
+			},
+		}),
+	});
+	const data = await res.json();
+	const approvalUrl = data.links?.find((l: any) => l.rel === "approve")?.href;
+	if (!approvalUrl) throw new Error("No approval URL in PayPal response");
+	return { approvalUrl, orderId: data.id };
+}
+
+async function captureOrder(orderId: string, accessToken: string): Promise<void> {
+	await fetch(`${PAYPAL_BASE}/v2/checkout/orders/${orderId}/capture`, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			"Content-Type": "application/json",
+		},
+	});
 }
 
 export default function Checkout() {
@@ -86,12 +71,9 @@ export default function Checkout() {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [placing, setPlacing] = useState<boolean>(false);
 	const [showPayPal, setShowPayPal] = useState<boolean>(false);
+	const [approvalUrl, setApprovalUrl] = useState<string | null>(null);
+	const [orderId, setOrderId] = useState<string | null>(null);
 	const [search, setSearch] = useState("");
-	const [form, setForm] = useState<ShippingForm>({
-		name: "",
-		address: "",
-		city: "",
-	});
 
 	useFocusEffect(
 		useCallback(() => {
@@ -108,40 +90,49 @@ export default function Checkout() {
 		}
 	}
 
-	function updateField(field: keyof ShippingForm, value: string): void {
-		setForm((prev) => ({ ...prev, [field]: value }));
-	}
-
 	const total: string = cart
 		.reduce((sum: number, p: Product) => sum + p.price * (p.count || 1), 0)
 		.toFixed(2);
 
-	function handlePlaceOrder(): void {
-		if (!form.name.trim() || !form.address.trim() || !form.city.trim()) {
-			Alert.alert("Missing info", "Please fill in all fields.");
-			return;
+	async function handlePlaceOrder(): Promise<void> {
+		try {
+			setPlacing(true);
+			const token = await getAccessToken();
+			const { approvalUrl: url, orderId: id } = await createOrder(total, token);
+			setApprovalUrl(url);
+			setOrderId(id);
+			setShowPayPal(true);
+		} catch {
+			Alert.alert("Error", "Could not connect to PayPal. Check your internet connection.");
+		} finally {
+			setPlacing(false);
 		}
-		setShowPayPal(true);
 	}
 
-	async function handlePayPalMessage(event: { nativeEvent: { data: string } }): Promise<void> {
-		const data = JSON.parse(event.nativeEvent.data);
+	async function handleNavigationChange(navState: { url: string }): Promise<void> {
+		const { url } = navState;
 
-		if (data.cancelled) {
+		if (url.startsWith(CANCEL_URL)) {
 			setShowPayPal(false);
+			setApprovalUrl(null);
 			return;
 		}
 
-		setShowPayPal(false);
-
-		if (data.success) {
-			setPlacing(true);
-			await saveCart([]);
-			setCart([]);
-			setPlacing(false);
-			Alert.alert("Order placed!", "Thank you for your purchase.");
-		} else {
-			Alert.alert("Payment failed", "Something went wrong. Please try again.");
+		if (url.startsWith(RETURN_URL)) {
+			setShowPayPal(false);
+			setApprovalUrl(null);
+			try {
+				setPlacing(true);
+				const token = await getAccessToken();
+				await captureOrder(orderId!, token);
+				await saveCart([]);
+				setCart([]);
+				Alert.alert("Order placed!", "Thank you for your purchase.");
+			} catch {
+				Alert.alert("Payment failed", "Something went wrong capturing the payment.");
+			} finally {
+				setPlacing(false);
+			}
 		}
 	}
 
@@ -157,14 +148,12 @@ export default function Checkout() {
 		<View style={[S.screenNoPad, { backgroundColor: Colors.bg }]}>
 			<StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
 			<Navbar search={search} setSearch={setSearch} />
-
+			
 			<Modal visible={showPayPal} animationType="slide" onRequestClose={() => setShowPayPal(false)}>
 				<View style={[S.screenNoPad, { backgroundColor: Colors.bg }]}>
-
-					{/* Header */}
 					<View style={[S.rowBetween, {
 						paddingHorizontal: Spacing.lg,
-						paddingTop: Spacing.xxl,
+						paddingTop: Spacing.lg,
 						paddingBottom: Spacing.lg,
 						borderBottomWidth: 1,
 						borderBottomColor: Colors.border,
@@ -172,7 +161,7 @@ export default function Checkout() {
 					}]}>
 						<Text style={[S.heading, { marginBottom: 0 }]}>Pay with PayPal</Text>
 						<Pressable
-							onPress={() => setShowPayPal(false)}
+							onPress={() => { setShowPayPal(false); setApprovalUrl(null); }}
 							style={({ pressed }) => [
 								{
 									backgroundColor: Colors.input,
@@ -191,13 +180,14 @@ export default function Checkout() {
 						</Pressable>
 					</View>
 
-					<WebView
-						source={{ html: buildPaypalHTML(total) }}
-						onMessage={handlePayPalMessage}
-						javaScriptEnabled
-						style={{ backgroundColor: Colors.bg }}
-					/>
-
+					{approvalUrl && (
+						<WebView
+							source={{ uri: approvalUrl }}
+							onNavigationStateChange={handleNavigationChange}
+							javaScriptEnabled
+							style={{ backgroundColor: Colors.bg }}
+						/>
+					)}
 				</View>
 			</Modal>
 
@@ -232,24 +222,6 @@ export default function Checkout() {
 							</Text>
 							<Text style={[S.price, { fontSize: Typography.lg }]}>${total}</Text>
 						</View>
-					</View>
-
-					<Text style={[S.sectionTitle, { marginTop: Spacing.xl }]}>Shipping Info</Text>
-					<View style={S.card}>
-						{(["name", "address", "city"] as (keyof ShippingForm)[]).map((field, i, arr) => (
-							<View key={field} style={{ marginBottom: i < arr.length - 1 ? Spacing.sm : 0 }}>
-								<Text style={S.label}>{field}</Text>
-								<View style={S.inputWrapper}>
-									<TextInput
-										style={S.inputText}
-										placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-										placeholderTextColor={Colors.textMuted}
-										value={form[field]}
-										onChangeText={(v) => updateField(field, v)}
-									/>
-								</View>
-							</View>
-						))}
 					</View>
 
 					<Pressable

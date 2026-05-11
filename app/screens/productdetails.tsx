@@ -1,11 +1,11 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react-native";
 
 import products from "../data/products";
 import { getCart, addToCart } from "../storage/cartStorage";
-
-import S, { Spacing } from "@/app/styles/global";
+import S, { Spacing, Colors } from "@/app/styles/global";
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
@@ -28,10 +28,7 @@ export default function ProductDetails() {
   }, [id]);
 
   function goToProduct(productId: number) {
-    router.push({
-      pathname: "screens/productdetails",
-      params: { id: productId },
-    });
+    router.push(`/productdetails/${productId}`);
   }
 
   async function handleAddToCart() {
@@ -59,27 +56,47 @@ export default function ProductDetails() {
   }
 
   return (
-    <ScrollView contentContainerStyle={S.screen}>
-      <Text style={S.heading}>Product Details</Text>
+    <ScrollView contentContainerStyle={S.screen} showsVerticalScrollIndicator={false}>
+      {/* Header with Back Button */}
+      <View style={[S.screenHeader, { marginBottom: Spacing.lg }]}>
+        <Text style={S.heading}>Product Details</Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft size={24} color={Colors.textPrimary} />
+        </TouchableOpacity>
+      </View>
 
-      <View style={[S.card, { gap: Spacing.sm }]}>
+      {/* Product Info Card */}
+      <View style={[S.cardElevated, { gap: Spacing.md, marginBottom: Spacing.lg }]}>
         <DetailRow label="ID" value={product.id} />
         <DetailRow label="Name" value={product.name} />
         <DetailRow label="Category" value={product.category} />
         <DetailRow label="Description" value={product.description} />
-        <DetailRow label="Rating" value={product.rating} />
-        <DetailRow label="Price" value={`${product.price}€`} />
-        <DetailRow label="Stock" value={product.stock} />
+        <DetailRow label="Rating" value={`⭐ ${product.rating}`} />
+        <DetailRow label="Price" value={`€${product.price}`} />
+        <DetailRow 
+          label="Stock" 
+          value={product.inStock ? `${product.stock} available` : "Out of Stock"} 
+        />
+        <DetailRow 
+          label="Status" 
+          value={product.inStock ? "In Stock" : "Out of Stock"}
+          highlight={!product.inStock}
+        />
       </View>
 
-      <Pressable
+      {/* Add to Cart Button */}
+      <TouchableOpacity
         style={[
           S.btnPrimary,
           (!product.inStock || inCart) && S.btnDisabled,
-          { marginTop: Spacing.lg },
+          { marginBottom: Spacing.lg },
         ]}
         onPress={handleAddToCart}
         disabled={!product.inStock || inCart}
+        activeOpacity={0.85}
       >
         <Text style={S.btnPrimaryText}>
           {!product.inStock
@@ -88,42 +105,50 @@ export default function ProductDetails() {
             ? "Already in Cart"
             : "Add to Cart"}
         </Text>
-      </Pressable>
+      </TouchableOpacity>
 
-      <View style={[S.rowBetween, { marginTop: Spacing.lg, gap: Spacing.sm }]}>
-        <Pressable
+      {/* Navigation Buttons */}
+      <View style={[S.rowBetween, { gap: Spacing.sm }]}>
+        <TouchableOpacity
           style={[
             S.btnSecondary,
-            !prevProduct && { opacity: 0.5 },
+            !prevProduct && S.btnDisabled,
             { flex: 1 },
           ]}
           disabled={!prevProduct}
           onPress={() => prevProduct && goToProduct(prevProduct.id)}
+          activeOpacity={0.85}
         >
-          <Text style={S.btnSecondaryText}>Previous</Text>
-        </Pressable>
+          <Text style={S.btnSecondaryText}>← Previous</Text>
+        </TouchableOpacity>
 
-        <Pressable
+        <TouchableOpacity
           style={[
             S.btnSecondary,
-            !nextProduct && { opacity: 0.5 },
+            !nextProduct && S.btnDisabled,
             { flex: 1 },
           ]}
           disabled={!nextProduct}
           onPress={() => nextProduct && goToProduct(nextProduct.id)}
+          activeOpacity={0.85}
         >
-          <Text style={S.btnSecondaryText}>Next</Text>
-        </Pressable>
+          <Text style={S.btnSecondaryText}>Next →</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
 
-function DetailRow({ label, value }) {
+function DetailRow({ label, value, highlight }: { label: string; value: any; highlight?: boolean }) {
   return (
-    <View style={S.rowWrap}>
+    <View style={[S.rowBetween, { paddingVertical: Spacing.sm, borderBottomWidth: 1, borderBottomColor: Colors.border }]}>
       <Text style={S.label}>{label}:</Text>
-      <Text style={S.body}>{String(value)}</Text>
+      <Text style={[
+        S.body,
+        highlight && { color: Colors.danger, fontWeight: "700" }
+      ]}>
+        {String(value)}
+      </Text>
     </View>
   );
 }

@@ -18,7 +18,7 @@ import Footer from "@/app/components/Footer";
 export default function HomeScreen() {
   const router = useRouter();
   const { wishlist } = useWishlist();
-  const [search, setSearch] = useState("");
+  
 
   const favProducts = [
     { id: 1, pName: "StreetCore Oversized Hoodie", price: 65, category: "Hoodies", rating: 4.3, stock: 12, inStock: true, description: "Heavy oversized hoodie with soft streetwear cotton blend." },
@@ -139,7 +139,7 @@ export default function HomeScreen() {
               fontSize: Typography.xxl,
               fontWeight: Typography.extrabold,
             }}>
-              8
+              10
             </Text>
             <Text style={S.caption}>Categories</Text>
           </View>
@@ -172,7 +172,7 @@ export default function HomeScreen() {
               {favProducts.map((item) => (
                 <View key={item.id} style={[S.cardElevated, {
                   width: 250,
-                  height: 350,
+                  height: 110,
                   margin: 10,
                   padding: 7,
                 }]}>
@@ -186,9 +186,9 @@ export default function HomeScreen() {
                   </View>
                   <Text style={S.price}>${item.price}</Text>
 
-                  <View style={{backgroundColor: 'gray', width: 200, height: 200, margin: 'auto'}}>
+                  {/* <View style={{backgroundColor: 'gray', width: 200, height: 200, margin: 'auto'}}>
                     <Text style={{color: 'white', textAlign: 'center', marginTop: 90, fontSize: Typography.xxl }}>Image not found</Text>
-                  </View>
+                  </View> */}
 
                 </View>
               ))}
