@@ -1,6 +1,6 @@
 import { View, Text, FlatList, TouchableOpacity, Animated } from "react-native";
 import { useWishlist } from "../context/WishlistContext";
-import S, { Colors, Spacing } from "@/app/styles/global";
+import S, { Colors, Spacing, Typography, Radius } from "@/app/styles/global";
 import { useRef, useState } from "react";
 
 export default function Wishlist() {
@@ -29,53 +29,53 @@ export default function Wishlist() {
           keyExtractor={(item) => item.id.toString()}
           scrollEnabled={true}
           renderItem={({ item }) => (
-  <View style={S.card}>
-    {/* Product Info */}
-    <View style={{ flex: 1 }}>
-      <Text style={S.subheading}>{item.name}</Text>
-      <Text style={[S.label, { marginTop: Spacing.xs }]}>{item.category}</Text>
-      <Text style={[S.price, { marginTop: Spacing.xs }]}>€{item.price}</Text>
-    </View>
+            <View style={[S.card, S.rowBetween]}>
+      
+              <View style={{ flex: 1 }}>
+                <Text style={S.subheading}>{item.name}</Text>
+                <Text style={[S.label, { marginTop: Spacing.xs }]}>{item.category}</Text>
+                <Text style={[S.price, { marginTop: Spacing.xs, fontSize: Typography.xl }]}>
+                  €{item.price}
+                </Text>
+              </View>
 
-    {/* Remove Button - Version i përmirësuar për mobile */}
-    <TouchableOpacity
-      style={{
-        backgroundColor: Colors.danger,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 8,
-        marginLeft: 12,
-      }}
-      onPress={() => {
-        removeFromWishlist(item.id);
-        showToast(`${item.name} removed from wishlist`);
-      }}
-    >
-      <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
-        Remove
-      </Text>
-    </TouchableOpacity>
-  </View>
-)}
+           
+              <TouchableOpacity
+                style={{
+                  borderWidth: 1,
+                  borderColor: Colors.danger,
+                  paddingHorizontal: Spacing.md,
+                  paddingVertical: Spacing.sm,
+                  borderRadius: Radius.md,
+                  marginLeft: Spacing.md,
+                }}
+                onPress={() => {
+                  removeFromWishlist(item.id);
+                  showToast(`${item.name} removed from wishlist`);
+                }}
+              >
+                <Text style={{ color: Colors.danger, fontWeight: Typography.semibold, fontSize: Typography.sm }}>
+                  Remove
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         />
       )}
 
-      {/* Toast Notification */}
       <Animated.View
-        style={[
-          {
-            opacity,
-            position: "absolute",
-            bottom: 30,
-            alignSelf: "center",
-            backgroundColor: Colors.textPrimary,
-            paddingHorizontal: Spacing.lg,
-            paddingVertical: Spacing.md,
-            borderRadius: 24,
-          },
-        ]}
+        style={{
+          opacity,
+          position: "absolute",
+          bottom: 30,
+          alignSelf: "center",
+          backgroundColor: Colors.textPrimary,
+          paddingHorizontal: Spacing.lg,
+          paddingVertical: Spacing.md,
+          borderRadius: Radius.full,
+        }}
       >
-        <Text style={{ color: Colors.card, fontSize: 14, fontWeight: "600" }}>
+        <Text style={{ color: Colors.card, fontSize: Typography.sm, fontWeight: Typography.semibold }}>
           {toastMessage}
         </Text>
       </Animated.View>
