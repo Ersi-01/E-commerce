@@ -58,6 +58,6 @@ const products = [
   { id: 48, name: "StreetNova Shorts V2", price: 39, category: "Shorts", rating: 4.2, stock: 19, inStock: true, description: "Updated street cargo shorts." },
   { id: 49, name: "CoreDrift Heavy Tee", price: 27, category: "T-Shirts", rating: 4.3, stock: 28, inStock: true, description: "Thick premium cotton tee." },
   { id: 50, name: "NightCore Street Jacket", price: 94, category: "Jackets", rating: 4.7, stock: 5, inStock: true, description: "High-end streetwear jacket." },
-  {id: 51, name: "Fatjon Derhemi", price: 680000, category: "Hoodies", rating: 4.4, stock: 8, inStock: true, description: "Zip hoodie with urban fit." },
+  
 ];
 export default products;
