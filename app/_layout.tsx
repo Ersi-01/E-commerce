@@ -4,10 +4,10 @@ import { ThemeProvider } from './context/ThemeContext';
 
 export default function RootLayout() {
   return (
-    <WishlistProvider>
-            <ThemeProvider>
-      <Slot />
-      </ThemeProvider>
-    </WishlistProvider>
+    <ThemeProvider>
+      <WishlistProvider>
+        <Slot />
+      </WishlistProvider>
+    </ThemeProvider>
   );
 }

@@ -1,73 +1,90 @@
 /**
- * Import tokens:   import { Colors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
+ * Import tokens:   import { getColors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
  * Import styles:   import S from "@/app/styles/global";
-
- *** ONLY FOR DEVELOPERS
-
- * Manual migration to global styles
-   1. Import:
-   import S from "@/app/styles/global";
-   import { Colors, Spacing, Radius, Typography, Shadows } from "@/app/styles/global";
-   2. Delete all `StyleSheet.create` styles.
-   3. Replace all hardcoded values:
-   colors → `Colors.*`
-   spacing → `Spacing.*`
-   radius → `Radius.*`
-   fonts → `Typography.*`
-   shadows → `Shadows.*`
-   4. Use existing shared styles first:
-   style={S.card}
-   5. If needed, combine:
-   style={[S.card, { marginTop: Spacing.lg }]}
-   6. Do not change logic, only styling.
  */
+
 import { StyleSheet } from "react-native";
 
-const DarkColors = {
-  bg:            "#0a0a0f",
-  card:          "#13131a",
-  input:         "#1a1a24",
-  border:        "#2a2a3a",
-  textPrimary:   "#ffffff",
-  textSecondary: "#aaaaaa",
-  textMuted:     "#666666",
-  textDim:       "#888888",
-  accent:        "#f0c060",
-  accentDark:    "#0a0a0f",
-  success:       "#4caf50",
-  danger:        "#f44336",
-  dangerBg:      "#ff444422",
-  dangerBorder:  "#ff4444",
-  blobGold:      "#f0c06022",
-  blobBlue:      "#6060f022",
+// Light theme colors
+const LIGHT_COLORS = {
+  bg:           "#f8f9fc",
+  bgAlt:        "#f0f2f8",
+  card:         "#ffffff",
+  input:        "#f1f4f9",
+  border:       "#e4e8f0",
+  borderLight:  "#eef1f7",
+
+  textPrimary:  "#0d1b2a",
+  textSecondary:"#4a5568",
+  textMuted:    "#9aa5b4",
+  textDim:      "#6b7a8d",
+
+  accent:       "#4f46e5",
+  accentLight:  "#ede9fe",
+  accentDark:   "#ffffff",
+  accentMid:    "#6c63ff",
+
+  success:      "#059669",
+  successBg:    "#ecfdf5",
+  danger:       "#dc2626",
+  dangerBg:     "#fef2f2",
+  dangerBorder: "#fca5a5",
+
+  gold:         "#f59e0b",
+  goldBg:       "#fffbeb",
+
+  blobGold:     "#4f46e512",
+  blobBlue:     "#3b82f612",
+
+  navBg:        "#ffffff",
+  navBorder:    "#e4e8f0",
 };
 
-const LightColors = {
-  bg:            "#f6f7fb",
-  card:          "#ffffff",
-  input:         "#f1f3f9",
-  border:        "#e2e6f0",
-  textPrimary:   "#0f172a",
-  textSecondary: "#475569",
-  textMuted:     "#94a3b8",
-  textDim:       "#64748b",
-  accent:        "#4f46e5",
-  accentDark:    "#ffffff",
-  success:       "#16a34a",
-  danger:        "#dc2626",
-  dangerBg:      "#dc262622",
-  dangerBorder:  "#dc2626",
-  blobGold:      "#4f46e522",
-  blobBlue:      "#3b82f622",
+// Dark theme colors
+const DARK_COLORS = {
+  bg:           "#0f172a",
+  bgAlt:        "#1e293b",
+  card:         "#1e293b",
+  input:        "#334155",
+  border:       "#475569",
+  borderLight:  "#64748b",
+
+  textPrimary:  "#f1f5f9",
+  textSecondary:"#cbd5e1",
+  textMuted:    "#94a3b8",
+  textDim:      "#78909c",
+
+  accent:       "#818cf8",
+  accentLight:  "#4c1d95",
+  accentDark:   "#e0e7ff",
+  accentMid:    "#a5b4fc",
+
+  success:      "#10b981",
+  successBg:    "#064e3b",
+  danger:       "#ef4444",
+  dangerBg:     "#7f1d1d",
+  dangerBorder: "#991b1b",
+
+  gold:         "#fbbf24",
+  goldBg:       "#78350f",
+
+  blobGold:     "#f59e0b20",
+  blobBlue:     "#3b82f620",
+
+  navBg:        "#1e293b",
+  navBorder:    "#334155",
 };
 
+// Export both palettes directly
+export { LIGHT_COLORS, DARK_COLORS };
 
-export let Colors = DarkColors;
-
-
-export function applyTheme(isDark: boolean) {
-  Colors = isDark ? DarkColors : LightColors;
+// Helper function to get colors based on theme
+export function getColors(isDark: boolean) {
+  return isDark ? DARK_COLORS : LIGHT_COLORS;
 }
+
+// For backwards compatibility with existing code
+export const Colors = LIGHT_COLORS;
 
 export const Spacing = {
   xs:   4,
@@ -80,12 +97,13 @@ export const Spacing = {
 };
 
 export const Radius = {
+  xs:   6,
   sm:   8,
-  md:   10,
-  lg:   12,
-  xl:   14,
-  xxl:  20,
-  xxxl: 24,
+  md:   12,
+  lg:   14,
+  xl:   18,
+  xxl:  24,
+  xxxl: 32,
   full: 999,
 };
 
@@ -98,8 +116,8 @@ export const Typography = {
   xl:        18,
   xxl:       20,
   xxxl:      22,
-  h2:        24,
-  h1:        30,
+  h2:        26,
+  h1:        32,
   regular:   "400" as const,
   medium:    "500" as const,
   semibold:  "600" as const,
@@ -108,89 +126,436 @@ export const Typography = {
 };
 
 export const Shadows = {
-  card: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.4,
-    shadowRadius: 24,
-    elevation: 10,
+  sm: {
+    shadowColor: "#1e293b",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  accent: {
-    shadowColor: DarkColors.accent,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+  card: {
+    shadowColor: "#1e293b",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  elevated: {
+    shadowColor: "#1e293b",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
     elevation: 8,
   },
+  accent: {
+    shadowColor: "#4f46e5",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 12,
+    elevation: 6,
+  },
   logo: {
-    shadowColor: DarkColors.accent,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
+    shadowColor: "#4f46e5",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
     shadowRadius: 16,
-    elevation: 12,
+    elevation: 10,
   },
 };
 
-// StyleSheet.create — NDRYSHOHET ASGJË KËTU
+  
+
 const S = StyleSheet.create({
-  screen:           { flex: 1, backgroundColor: DarkColors.bg, padding: Spacing.lg },
-  screenNoPad:      { flex: 1, backgroundColor: DarkColors.bg },
-  centered:         { flex: 1, alignItems: "center", justifyContent: "center" },
-  heading:          { color: DarkColors.textPrimary, fontSize: Typography.xxxl, fontWeight: Typography.bold, marginBottom: Spacing.lg },
-  subheading:       { color: DarkColors.textPrimary, fontSize: Typography.h2, fontWeight: Typography.bold, marginBottom: Spacing.sm },
-  label:            { fontSize: Typography.xs, fontWeight: Typography.semibold, color: DarkColors.textDim, marginBottom: Spacing.sm, letterSpacing: 0.8, textTransform: "uppercase" },
-  body:             { color: DarkColors.textSecondary, fontSize: Typography.base, lineHeight: 20 },
-  caption:          { color: DarkColors.textMuted, fontSize: Typography.sm },
-  price:            { color: DarkColors.accent, fontSize: Typography.md, fontWeight: Typography.bold },
-  rating:           { color: DarkColors.textSecondary, fontSize: Typography.sm },
-  inStock:          { color: DarkColors.success, fontSize: Typography.sm, fontWeight: Typography.semibold },
-  outOfStock:       { color: DarkColors.danger, fontSize: Typography.sm, fontWeight: Typography.semibold },
-  emptyText:        { color: DarkColors.textMuted, textAlign: "center", marginTop: 40, fontSize: Typography.lg },
-  card:             { backgroundColor: DarkColors.card, borderRadius: Radius.lg, padding: Spacing.md, marginBottom: Spacing.sm, borderWidth: 1, borderColor: DarkColors.border },
-  cardElevated:     { backgroundColor: DarkColors.card, borderRadius: Radius.xxxl, padding: Spacing.xxl + 4, borderWidth: 1, borderColor: DarkColors.border, ...Shadows.card },
-  rowBetween:       { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  rowWrap:          { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
-  screenHeader:     { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Spacing.sm },
-  btnPrimary:       { backgroundColor: DarkColors.accent, borderRadius: Radius.xl, height: 54, alignItems: "center", justifyContent: "center", ...Shadows.accent },
-  btnPrimaryText:   { color: DarkColors.accentDark, fontSize: Typography.lg, fontWeight: Typography.extrabold, letterSpacing: 0.5 },
-  btnSecondary:     { borderRadius: Radius.xl, height: 50, borderWidth: 1, borderColor: DarkColors.border, alignItems: "center", justifyContent: "center" },
-  btnSecondaryText: { color: DarkColors.textSecondary, fontWeight: Typography.semibold, fontSize: Typography.md },
-  btnDanger:        { backgroundColor: DarkColors.danger, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm + 2, borderRadius: Radius.sm },
-  btnDangerText:    { color: DarkColors.textPrimary, fontWeight: Typography.semibold },
-  btnDisabled:      { opacity: 0.6, backgroundColor: DarkColors.border },
-  btnChip:          { flexDirection: "row", alignItems: "center", backgroundColor: DarkColors.accent, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, borderRadius: Radius.md, gap: Spacing.xs + 2 },
-  btnChipText:      { color: DarkColors.accentDark, fontWeight: Typography.bold, fontSize: Typography.base },
-  inputWrapper:     { flexDirection: "row", alignItems: "center", backgroundColor: DarkColors.input, borderRadius: Radius.lg, borderWidth: 1, borderColor: DarkColors.border, paddingHorizontal: Spacing.md, height: 52 },
-  inputError:       { borderColor: DarkColors.danger },
-  inputText:        { flex: 1, color: DarkColors.textPrimary, fontSize: Typography.md },
-  inputIcon:        { fontSize: Typography.lg, marginRight: Spacing.sm + 2 },
-  fieldError:       { color: "#ff6666", fontSize: Typography.sm, marginTop: Spacing.xs + 2 },
-  errorBanner:      { backgroundColor: DarkColors.dangerBg, borderWidth: 1, borderColor: DarkColors.dangerBorder, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.lg },
-  errorBannerText:  { color: "#ff6666", fontSize: Typography.sm },
-  checkbox:         { width: 22, height: 22, borderRadius: Radius.sm - 2, borderWidth: 2, borderColor: DarkColors.border, alignItems: "center", justifyContent: "center" },
-  checkboxActive:   { backgroundColor: DarkColors.accent, borderColor: DarkColors.accent },
-  checkmark:        { color: DarkColors.accentDark, fontSize: Typography.sm, fontWeight: Typography.bold },
-  chip:             { paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs + 3, borderRadius: Radius.full, borderWidth: 1, borderColor: DarkColors.border, backgroundColor: DarkColors.input },
-  chipActive:       { backgroundColor: DarkColors.accent, borderColor: DarkColors.accent },
-  chipText:         { color: DarkColors.textDim, fontSize: Typography.sm + 1 },
-  chipTextActive:   { color: DarkColors.accentDark, fontWeight: Typography.bold },
-  badge:            { backgroundColor: DarkColors.accentDark, borderRadius: Radius.full, minWidth: 18, height: 18, alignItems: "center", justifyContent: "center", paddingHorizontal: Spacing.xs },
-  badgeText:        { color: DarkColors.accent, fontSize: Typography.xs, fontWeight: "800" },
-  overlay:          { flex: 1, backgroundColor: "#000000aa", justifyContent: "flex-end" },
-  sheet:            { backgroundColor: DarkColors.card, borderTopLeftRadius: Radius.xxl, borderTopRightRadius: Radius.xxl, padding: Spacing.xxl, borderWidth: 1, borderColor: DarkColors.border },
-  sheetHeader:      { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Spacing.xl },
-  sheetTitle:       { color: DarkColors.textPrimary, fontSize: Typography.xxl, fontWeight: Typography.bold },
-  closeBtn:         { color: DarkColors.textPrimary, fontSize: Typography.xxl, fontWeight: Typography.regular },
-  sectionTitle:     { color: DarkColors.textDim, fontSize: Typography.xs, fontWeight: Typography.semibold, letterSpacing: 0.8, textTransform: "uppercase", marginTop: Spacing.xl, marginBottom: Spacing.sm + 2 },
-  dividerRow:       { flexDirection: "row", alignItems: "center", marginVertical: Spacing.xl },
-  dividerLine:      { flex: 1, height: 1, backgroundColor: DarkColors.border },
-  dividerText:      { color: DarkColors.textMuted, fontSize: Typography.sm, marginHorizontal: Spacing.md },
-  blobTop:          { position: "absolute", top: -80, right: -80, width: 250, height: 250, borderRadius: 125, backgroundColor: DarkColors.blobGold },
-  blobBottom:       { position: "absolute", bottom: -60, left: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: DarkColors.blobBlue },
-  socialRow:        { flexDirection: "row", gap: Spacing.md, marginBottom: Spacing.xl },
-  socialBtn:        { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: DarkColors.input, borderRadius: Radius.lg, borderWidth: 1, borderColor: DarkColors.border, height: 48, gap: Spacing.sm },
-  socialIcon:       { color: DarkColors.textPrimary, fontSize: Typography.lg, fontWeight: Typography.bold },
-  socialLabel:      { color: DarkColors.textSecondary, fontSize: Typography.base, fontWeight: Typography.semibold },
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+    padding: Spacing.lg,
+  },
+  screenNoPad: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+  },
+  centered: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heading: {
+    color: Colors.textPrimary,
+    fontSize: Typography.xxxl,
+    fontWeight: Typography.bold,
+    letterSpacing: -0.3,
+    marginBottom: Spacing.lg,
+  },
+  subheading: {
+    color: Colors.textPrimary,
+    fontSize: Typography.xl,
+    fontWeight: Typography.bold,
+    letterSpacing: -0.2,
+    marginBottom: Spacing.sm,
+  },
+  label: {
+    fontSize: Typography.xs,
+    fontWeight: Typography.bold,
+    color: Colors.textMuted,
+    marginBottom: Spacing.sm,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  body: {
+    color: Colors.textSecondary,
+    fontSize: Typography.base,
+    lineHeight: 22,
+  },
+  caption: {
+    color: Colors.textMuted,
+    fontSize: Typography.sm,
+    lineHeight: 18,
+  },
+  price: {
+    color: Colors.accent,
+    fontSize: Typography.md,
+    fontWeight: Typography.bold,
+    letterSpacing: -0.2,
+  },
+  rating: {
+    color: Colors.textSecondary,
+    fontSize: Typography.sm,
+  },
+  inStock: {
+    color: Colors.success,
+    fontSize: Typography.sm,
+    fontWeight: Typography.semibold,
+  },
+  outOfStock: {
+    color: Colors.danger,
+    fontSize: Typography.sm,
+    fontWeight: Typography.semibold,
+  },
+  emptyText: {
+    color: Colors.textMuted,
+    textAlign: "center",
+    marginTop: 48,
+    fontSize: Typography.lg,
+    fontWeight: Typography.medium,
+  },
+  card: {
+    backgroundColor: Colors.card,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    shadowColor: "#1e293b",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  cardElevated: {
+    backgroundColor: Colors.card,
+    borderRadius: Radius.xxl,
+    padding: Spacing.xxl,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    shadowColor: "#1e293b",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  cardFlat: {
+    backgroundColor: Colors.card,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  rowWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
+  screenHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.md,
+  },
+  btnPrimary: {
+    backgroundColor: Colors.accent,
+    borderRadius: Radius.xl,
+    height: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#4f46e5",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  btnPrimaryText: {
+    color: Colors.accentDark,
+    fontSize: Typography.base,
+    fontWeight: Typography.bold,
+    letterSpacing: 0.3,
+  },
+  btnSecondary: {
+    borderRadius: Radius.xl,
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.card,
+  },
+  btnSecondaryText: {
+    color: Colors.textSecondary,
+    fontWeight: Typography.semibold,
+    fontSize: Typography.base,
+  },
+  btnDanger: {
+    backgroundColor: Colors.dangerBg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.dangerBorder,
+  },
+  btnDangerText: {
+    color: Colors.danger,
+    fontWeight: Typography.semibold,
+    fontSize: Typography.sm,
+  },
+  btnDisabled: {
+    opacity: 0.45,
+  },
+  btnChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.accent,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.md,
+    gap: Spacing.xs + 2,
+  },
+  btnChipText: {
+    color: Colors.accentDark,
+    fontWeight: Typography.bold,
+    fontSize: Typography.sm,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.input,
+    borderRadius: Radius.lg,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    height: 52,
+    marginBottom: Spacing.sm,
+  },
+  inputError: {
+    borderColor: Colors.danger,
+    backgroundColor: Colors.dangerBg,
+  },
+  inputText: {
+    flex: 1,
+    color: Colors.textPrimary,
+    fontSize: Typography.base,
+  },
+  inputIcon: {
+    fontSize: Typography.lg,
+    marginRight: Spacing.sm + 2,
+  },
+  fieldError: {
+    color: Colors.danger,
+    fontSize: Typography.xs,
+    marginTop: Spacing.xs + 2,
+    fontWeight: Typography.medium,
+  },
+  errorBanner: {
+    backgroundColor: Colors.dangerBg,
+    borderWidth: 1,
+    borderColor: Colors.dangerBorder,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  errorBannerText: {
+    color: Colors.danger,
+    fontSize: Typography.sm,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: Radius.sm - 2,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.input,
+  },
+  checkboxActive: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  checkmark: {
+    color: Colors.accentDark,
+    fontSize: Typography.sm,
+    fontWeight: Typography.bold,
+  },
+  chip: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs + 3,
+    borderRadius: Radius.full,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    backgroundColor: Colors.card,
+  },
+  chipActive: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  chipText: {
+    color: Colors.textDim,
+    fontSize: Typography.sm,
+    fontWeight: Typography.medium,
+  },
+  chipTextActive: {
+    color: Colors.accentDark,
+    fontWeight: Typography.bold,
+  },
+  badge: {
+    backgroundColor: Colors.danger,
+    borderRadius: Radius.full,
+    minWidth: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.xs,
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: Typography.xs,
+    fontWeight: Typography.bold,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "#0d1b2a88",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: Colors.card,
+    borderTopLeftRadius: Radius.xxxl,
+    borderTopRightRadius: Radius.xxxl,
+    padding: Spacing.xxl,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: Colors.border,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.xl,
+  },
+  sheetTitle: {
+    color: Colors.textPrimary,
+    fontSize: Typography.xxl,
+    fontWeight: Typography.bold,
+    letterSpacing: -0.3,
+  },
+  closeBtn: {
+    color: Colors.textMuted,
+    fontSize: Typography.lg,
+    fontWeight: Typography.regular,
+    width: 32,
+    height: 32,
+    textAlign: "center",
+    lineHeight: 32,
+    backgroundColor: Colors.input,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    overflow: "hidden",
+  },
+  sectionTitle: {
+    color: Colors.textMuted,
+    fontSize: Typography.xs,
+    fontWeight: Typography.bold,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.sm + 4,
+  },
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: Spacing.xl,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    color: Colors.textMuted,
+    fontSize: Typography.sm,
+    marginHorizontal: Spacing.md,
+  },
+  blobTop: {
+    position: "absolute",
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: Colors.blobGold,
+  },
+  blobBottom: {
+    position: "absolute",
+    bottom: -80,
+    left: -80,
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: Colors.blobBlue,
+  },
+  socialRow: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginBottom: Spacing.xl,
+  },
+  socialBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.input,
+    borderRadius: Radius.lg,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    height: 48,
+    gap: Spacing.sm,
+  },
+  socialIcon: {
+    color: Colors.textPrimary,
+    fontSize: Typography.lg,
+    fontWeight: Typography.bold,
+  },
+  socialLabel: {
+    color: Colors.textSecondary,
+    fontSize: Typography.base,
+    fontWeight: Typography.semibold,
+  },
 });
 
 export default S;

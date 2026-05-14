@@ -3,13 +3,12 @@ import {
   CreditCard,
   Heart,
   LogOut,
-  Moon,
+  MapPin,
   PackageCheck,
   Settings,
   ShoppingBag,
-  Smartphone,
   Star,
-  Sun,
+  Wallet,
 } from "lucide-react-native"
 import React, { useEffect, useMemo, useState } from "react"
 import {
@@ -23,16 +22,18 @@ import {
   View,
 } from "react-native"
 import { useRouter } from "expo-router"
-
+import { supabase } from "../utils/supabase"
+import Navbar from "@/app/components/Navbar"
 import { useWishlist } from "../context/WishlistContext"
-import { useTheme, ThemeMode } from "../context/ThemeContext"
-import S, { Colors, Radius, Spacing, Typography } from "@/app/styles/global"
+import { useTheme } from "../context/ThemeContext"
+import S, { Colors, Radius, Spacing, Typography, getColors } from "@/app/styles/global"
 import storage from "@/app/utils/storage"
 
 export default function Profile() {
+  const { isDark } = useTheme();
+  const Colors = getColors(isDark); 
   const router = useRouter()
   const { wishlist } = useWishlist()
-  const { themeMode, setThemeMode } = useTheme()
 
   const [email, setEmail] = useState("user@store.com")
   const [name, setName] = useState("")
@@ -41,45 +42,34 @@ export default function Profile() {
 
   const [topupVisible, setTopupVisible] = useState(false)
   const [topupAmount, setTopupAmount] = useState("")
-  const [settingsVisible, setSettingsVisible] = useState(false)
-
-  const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: React.ElementType; desc: string }[] = [
-    { mode: "dark",   label: "Dark",   icon: Moon,       desc: "Dark background, easy on eyes" },
-    { mode: "light",  label: "Light",  icon: Sun,        desc: "Bright and clean interface"    },
-    { mode: "system", label: "System", icon: Smartphone, desc: "Follows your device setting"   },
-  ]
 
   useEffect(() => {
     loadProfile()
   }, [])
 
   const loadProfile = async () => {
-    try {
-      const savedUser = await storage.get("@ecommerce_session")
-
-      if (savedUser) {
-        const user = JSON.parse(savedUser)
-        if (user.email) setEmail(user.email)
-        if (user.name) setName(user.name)
-      }
-
-      const savedBalance = await storage.get("@user_balance")
-
-      if (savedBalance) {
-        setBalance(Number(savedBalance))
-      } else {
-        await storage.set("@user_balance", "0")
-      }
-
-      const savedOrders = await storage.get("@user_orders")
-
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders))
-      }
-    } catch (err) {
-      console.log(err)
+  try {
+    const { data } = await supabase.auth.getUser();
+    if (data.user) {
+      setEmail(data.user.email ?? '');
+      setName(data.user.user_metadata?.name ?? '');
     }
+
+    const savedBalance = await storage.get("@user_balance");
+    if (savedBalance) {
+      setBalance(Number(savedBalance));
+    } else {
+      await storage.set("@user_balance", "0");
+    }
+
+    const savedOrders = await storage.get("@user_orders");
+    if (savedOrders) {
+      setOrders(JSON.parse(savedOrders));
+    }
+  } catch (err) {
+    console.log(err);
   }
+};
 
   const displayName = useMemo(() => {
     if (name) return name
@@ -121,9 +111,9 @@ export default function Profile() {
   }
 
   const handleSignOut = async () => {
-    await storage.remove("@ecommerce_session")
-    router.replace("/login" as any)
-  }
+    await supabase.auth.signOut();
+    router.replace('/login' as any);
+};
 
   return (
     <View
@@ -160,7 +150,6 @@ export default function Profile() {
           </View>
 
           <TouchableOpacity
-            onPress={() => setSettingsVisible(true)}
             style={{
               width: 44,
               height: 44,
@@ -342,62 +331,12 @@ export default function Profile() {
         </View>
       </ScrollView>
 
-      {/* SETTINGS MODAL */}
-      <Modal visible={settingsVisible} transparent animationType="slide" onRequestClose={() => setSettingsVisible(false)}>
-        <View style={S.overlay}>
-          <View style={S.sheet}>
 
-            <View style={S.sheetHeader}>
-              <Text style={S.sheetTitle}>⚙️ Settings</Text>
-              <TouchableOpacity onPress={() => setSettingsVisible(false)}>
-                <Text style={S.closeBtn}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={S.sectionTitle}>Appearance</Text>
-
-            {THEME_OPTIONS.map(({ mode, label, icon: Icon, desc }) => {
-              const isActive = themeMode === mode
-              return (
-                <TouchableOpacity
-                  key={mode}
-                  onPress={() => setThemeMode(mode)}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: isActive ? Colors.accent + "18" : Colors.card,
-                    borderRadius: Radius.lg,
-                    borderWidth: 1,
-                    borderColor: isActive ? Colors.accent : Colors.border,
-                    padding: Spacing.md,
-                    marginBottom: Spacing.sm,
-                  }}
-                >
-                  <View style={{ width: 42, height: 42, borderRadius: Radius.md, backgroundColor: isActive ? Colors.accent + "22" : Colors.input, alignItems: "center", justifyContent: "center", marginRight: Spacing.md }}>
-                    <Icon size={20} color={isActive ? Colors.accent : Colors.textDim} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: isActive ? Colors.accent : Colors.textPrimary, fontWeight: "700", fontSize: Typography.base }}>{label}</Text>
-                    <Text style={{ color: Colors.textDim, fontSize: Typography.sm, marginTop: 2 }}>{desc}</Text>
-                  </View>
-                  {isActive && (
-                    <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: Colors.accent, alignItems: "center", justifyContent: "center" }}>
-                      <Text style={{ color: Colors.accentDark, fontSize: 12, fontWeight: "900" }}>✓</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              )
-            })}
-
-            <TouchableOpacity style={[S.btnPrimary, { marginTop: Spacing.lg }]} onPress={() => setSettingsVisible(false)}>
-              <Text style={S.btnPrimaryText}>Done</Text>
-            </TouchableOpacity>
-
-          </View>
-        </View>
-      </Modal>
+      {/* NAVBAR */}
+      
 
       {/* TOPUP MODAL */}
+
       <Modal visible={topupVisible} transparent animationType="fade">
         <View 
           style={{
@@ -569,4 +508,4 @@ function MenuRow({
       <Text style={{ color: Colors.textMuted, fontSize: 28 }}>›</Text>
     </TouchableOpacity>
   )
-}
+} 
