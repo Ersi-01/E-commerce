@@ -11,8 +11,6 @@ export default function ProductDetails() {
   const { id } = useLocalSearchParams();
   const currentId = Number(id);
   const product = products.find((p) => p.id === currentId);
-  const prevProduct = products.find((p) => p.id === currentId - 1);
-  const nextProduct = products.find((p) => p.id === currentId + 1);
 
   const [inCart, setInCart] = useState(false);
 
@@ -25,13 +23,6 @@ export default function ProductDetails() {
 
     checkCart();
   }, [id]);
-
-function goToProduct(productId: number) {
-  router.push({
-    pathname: "/productdetails/[id]" as any,
-    params: { id: productId },
-  });
-}
 
   async function handleAddToCart() {
     if (!product) return;
@@ -99,35 +90,6 @@ function goToProduct(productId: number) {
             : "Add to Cart"}
         </Text>
       </TouchableOpacity>
-
-      {/* Navigation Buttons */}
-      <View style={[S.rowBetween, { gap: Spacing.sm }]}>
-        <TouchableOpacity
-          style={[
-            S.btnSecondary,
-            !prevProduct && S.btnDisabled,
-            { flex: 1 },
-          ]}
-          disabled={!prevProduct}
-          onPress={() => prevProduct && goToProduct(prevProduct.id)}
-          activeOpacity={0.85}
-        >
-          <Text style={S.btnSecondaryText}>← Previous</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            S.btnSecondary,
-            !nextProduct && S.btnDisabled,
-            { flex: 1 },
-          ]}
-          disabled={!nextProduct}
-          onPress={() => nextProduct && goToProduct(nextProduct.id)}
-          activeOpacity={0.85}
-        >
-          <Text style={S.btnSecondaryText}>Next →</Text>
-        </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 }
