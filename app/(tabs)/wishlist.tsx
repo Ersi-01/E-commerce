@@ -1,10 +1,12 @@
 import { View, Text, FlatList, TouchableOpacity, Animated, StyleSheet } from "react-native";
 import { useRef, useState } from "react";
 import { useWishlist } from "../context/WishlistContext";
+import { useTheme } from "../context/ThemeContext";
 import S, { Colors, Spacing, Typography, Radius } from "@/app/styles/global";
 import { Heart, Trash2 } from "lucide-react-native";
 
 export default function Wishlist() {
+  useTheme();
   const { wishlist, removeFromWishlist } = useWishlist();
   const [toastMessage, setToastMessage] = useState("");
   const opacity = useRef(new Animated.Value(0)).current;

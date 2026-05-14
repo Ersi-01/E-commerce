@@ -25,10 +25,13 @@ import { useRouter } from "expo-router"
 import { supabase } from "../utils/supabase"
 import Navbar from "@/app/components/Navbar"
 import { useWishlist } from "../context/WishlistContext"
-import S, { Colors, Radius, Spacing, Typography } from "@/app/styles/global"
+import { useTheme } from "../context/ThemeContext"
+import S, { Colors, Radius, Spacing, Typography, getColors } from "@/app/styles/global"
 import storage from "@/app/utils/storage"
 
 export default function Profile() {
+  const { isDark } = useTheme();
+  const Colors = getColors(isDark); 
   const router = useRouter()
   const { wishlist } = useWishlist()
 
