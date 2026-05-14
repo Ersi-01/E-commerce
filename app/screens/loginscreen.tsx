@@ -1,368 +1,312 @@
-  import React, { useState, useRef, useEffect } from 'react';
-  import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Animated,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    ActivityIndicator,
-    StatusBar,
-  } from 'react-native';
-  import { useRouter } from 'expo-router';
-  import { supabase } from '../utils/supabase';
-  import { Colors, Spacing, Radius, Typography } from '@/app/styles/global';
-  import S from '@/app/styles/global';
-  import storage from '@/app/utils/storage';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
+  StatusBar,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { supabase } from '../utils/supabase';
+import { Colors, Spacing, Radius, Typography } from '@/app/styles/global';
+import S from '@/app/styles/global';
 
-  type LoginErrors = {
-    email?: string | null;
-    password?: string | null;
-  };
-
-  export default function LoginScreen() {
-    const router = useRouter();
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<LoginErrors>({});
-
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const slideAnim = useRef(new Animated.Value(40)).current;
-    const shakeAnim = useRef(new Animated.Value(0)).current;
-
-    const passwordRef = useRef<TextInput>(null);
-
-    useEffect(() => {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          tension: 60,
-          friction: 10,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      checkExistingUser();
-    }, []);
-
-    const checkExistingUser = async () => {
-  try {
-    await storage.remove('@ecommerce_session'); // add this to clear old session
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      router.replace('/(tabs)' as any);
-    }
-  } catch (e) {
-    console.log('Storage error', e);
-  }
+type LoginErrors = {
+  email?: string | null;
+  password?: string | null;
 };
 
-    const triggerShake = () => {
-      Animated.sequence([
-        Animated.timing(shakeAnim, {
-          toValue: 10,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: -10,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: 8,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: -8,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: 0,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    };
+export default function LoginScreen() {
+  const router = useRouter();
 
-    const validate = () => {
-      const newErrors: LoginErrors = {};
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<LoginErrors>({});
 
-      if (!email.trim()) {
-        newErrors.email = 'Email is required';
-      } else if (!/\S+@\S+\.\S+/.test(email)) {
-        newErrors.email = 'Enter a valid email';
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(40)).current;
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+
+  const passwordRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 60,
+        friction: 10,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    checkExistingUser();
+  }, []);
+
+  const checkExistingUser = async () => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        router.replace('/(tabs)' as any);
       }
+    } catch (e) {
+      console.log('Storage error', e);
+    }
+  };
 
-      if (!password) {
-        newErrors.password = 'Password is required';
-      } else if (password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
-      }
+  const triggerShake = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+    ]).start();
+  };
 
+  const sanitize = (value: string) => {
+    return value
+      .replace(/[<>'"`;\\]/g, '')
+      .trim();
+  };
+
+  const validate = () => {
+    const newErrors: LoginErrors = {};
+
+    const cleanEmail = sanitize(email);
+    const cleanPassword = sanitize(password);
+
+    if (cleanEmail !== email.trim() || cleanPassword !== password.trim()) {
+      newErrors.email = 'Invalid characters detected';
       setErrors(newErrors);
+      return false;
+    }
 
-      return Object.keys(newErrors).length === 0;
-    };
+    if (email.length > 100) {
+      newErrors.email = 'Email is too long';
+    } else if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Enter a valid email';
+    }
 
-    const handleLogin = async () => {
-  if (!validate()) {
-    triggerShake();
-    return;
-  }
+    if (password.length > 64) {
+      newErrors.password = 'Password is too long';
+    } else if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
 
-  setLoading(true);
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    if (error) {
-      setErrors({ email: error.message });
+  const handleLogin = async () => {
+    if (!validate()) {
       triggerShake();
       return;
     }
 
-    await new Promise(res => setTimeout(res, 1500));
-    router.replace('/(tabs)' as any);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-  } catch (e) {
-    console.log('Login error', e);
-  } finally {
-    setLoading(false);
-  }
-};
+      if (error) {
+        setErrors({ email: error.message });
+        triggerShake();
+        return;
+      }
 
-    return (
-      <KeyboardAvoidingView
-        style={S.screenNoPad}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      await new Promise(res => setTimeout(res, 1500));
+      router.replace('/(tabs)' as any);
+
+    } catch (e) {
+      console.log('Login error', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={S.screenNoPad}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <StatusBar barStyle="light-content" backgroundColor={Colors.bg} />
+
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
       >
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor={Colors.bg}
-        />
+        <View style={S.blobTop} />
+        <View style={S.blobBottom} />
 
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
+        <Animated.View
+          style={[
+            styles.container,
+            {
+              opacity: fadeAnim,
+              transform: [
+                { translateY: slideAnim },
+                { translateX: shakeAnim },
+              ],
+            },
+          ]}
         >
-          <View style={S.blobTop} />
-          <View style={S.blobBottom} />
+          <View style={styles.header}>
+            <Text style={styles.brandName}>ShopApp</Text>
+            <Text style={S.caption}>Sign in to continue</Text>
+          </View>
 
-          <Animated.View
-            style={[
-              styles.container,
-              {
-                opacity: fadeAnim,
-                transform: [
-                  { translateY: slideAnim },
-                  { translateX: shakeAnim },
-                ],
-              },
-            ]}
-          >
-            <View style={styles.header}>
-              <Text style={styles.brandName}>ShopApp</Text>
-              <Text style={S.caption}>Sign in to continue</Text>
-            </View>
-
-            <View style={S.cardElevated}>
-              <View style={styles.fieldGroup}>
-                <Text style={S.label}>Email</Text>
-
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.email ? S.inputError : null,
-                    { outlineStyle: 'none' } as any,
-                  ]}
-                  placeholder="you@example.com"
-                  placeholderTextColor={Colors.textMuted}
-                  value={email}
-                  onChangeText={(t) => {
-                    setEmail(t);
-                    setErrors((e) => ({
-                      ...e,
-                      email: null,
-                    }));
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                  onSubmitEditing={() =>
-                    passwordRef.current?.focus()
-                  }
-                />
-
-                {errors.email && (
-                  <Text style={S.fieldError}>
-                    {errors.email}
-                  </Text>
-                )}
-              </View>
-
-              <View style={styles.fieldGroup}>
-                <Text style={S.label}>Password</Text>
-
-                <View
-                  style={[
-                    S.inputWrapper,
-                    errors.password ? S.inputError : null,
-                  ]}
-                >
-                  <TextInput
-                    ref={passwordRef}
-                    style={[
-                      S.inputText,
-                      { outlineStyle: 'none' } as any,
-                    ]}
-                    placeholder="Min. 6 characters"
-                    placeholderTextColor={Colors.textMuted}
-                    value={password}
-                    onChangeText={(t) => {
-                      setPassword(t);
-                      setErrors((e) => ({
-                        ...e,
-                        password: null,
-                      }));
-                    }}
-                    secureTextEntry={!showPassword}
-                    returnKeyType="done"
-                    onSubmitEditing={handleLogin}
-                  />  
-
-                  <TouchableOpacity
-                    onPress={() =>
-                      setShowPassword((v) => !v)
-                    }
-                    hitSlop={{
-                      top: 10,
-                      bottom: 10,
-                      left: 10,
-                      right: 10,
-                    }}
-                  >
-                    <Text style={styles.showHideText}>
-                      {showPassword ? 'HIDE' : 'SHOW'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {errors.password && (
-                  <Text style={S.fieldError}>
-                    {errors.password}
-                  </Text>
-                )}
-              </View>
-
-              <TouchableOpacity
+          <View style={S.cardElevated}>
+            <View style={styles.fieldGroup}>
+              <Text style={S.label}>Email</Text>
+              <TextInput
                 style={[
-                  S.btnPrimary,
-                  loading && S.btnDisabled,
+                  styles.input,
+                  errors.email ? S.inputError : null,
+                  { outlineStyle: 'none' } as any,
                 ]}
-                onPress={handleLogin}
-                disabled={loading}
-                activeOpacity={0.85}
-              >
-                {loading ? (
-                  <ActivityIndicator
-                    color={Colors.accentDark}
-                  />
-                ) : (
-                  <Text style={S.btnPrimaryText}>
-                    Sign In
-                  </Text>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.signupRow}
-                onPress={() =>
-                  router.push('/register' as any)
-                }
-              >
-                <Text style={S.caption}>
-                  Don't have an account?{' '}
-                  <Text style={styles.signupLink}>
-                    Create one
-                  </Text>
-                </Text>
-              </TouchableOpacity>
+                placeholder="you@example.com"
+                placeholderTextColor={Colors.textMuted}
+                value={email}
+                onChangeText={t => {
+                  setEmail(t);
+                  setErrors(e => ({ ...e, email: null }));
+                }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                maxLength={100}
+                onSubmitEditing={() => passwordRef.current?.focus()}
+              />
+              {errors.email && (
+                <Text style={S.fieldError}>{errors.email}</Text>
+              )}
             </View>
-          </Animated.View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    );
-  }
 
-  const styles = StyleSheet.create({
-    scroll: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      paddingVertical: Spacing.xl * 2,
-    },
+            <View style={styles.fieldGroup}>
+              <Text style={S.label}>Password</Text>
+              <View style={[S.inputWrapper, errors.password ? S.inputError : null]}>
+                <TextInput
+                  ref={passwordRef}
+                  style={[S.inputText, { outlineStyle: 'none' } as any]}
+                  placeholder="Min. 6 characters"
+                  placeholderTextColor={Colors.textMuted}
+                  value={password}
+                  onChangeText={t => {
+                    setPassword(t);
+                    setErrors(e => ({ ...e, password: null }));
+                  }}
+                  secureTextEntry={!showPassword}
+                  returnKeyType="done"
+                  maxLength={64}
+                  onSubmitEditing={handleLogin}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(v => !v)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Text style={styles.showHideText}>
+                    {showPassword ? 'HIDE' : 'SHOW'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {errors.password && (
+                <Text style={S.fieldError}>{errors.password}</Text>
+              )}
+            </View>
 
-    container: {
-      paddingHorizontal: Spacing.xxl,
-    },
+            <TouchableOpacity
+              style={[S.btnPrimary, loading && S.btnDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.85}
+            >
+              {loading ? (
+                <ActivityIndicator color={Colors.accentDark} />
+              ) : (
+                <Text style={S.btnPrimaryText}>Sign In</Text>
+              )}
+            </TouchableOpacity>
 
-    header: {
-      marginBottom: Spacing.xxxl,
-    },
+            <TouchableOpacity
+              style={styles.signupRow}
+              onPress={() => router.push('/register' as any)}
+            >
+              <Text style={S.caption}>
+                Don't have an account?{' '}
+                <Text style={styles.signupLink}>Create one</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
 
-    brandName: {
-      fontSize: Typography.h1,
-      fontWeight: Typography.extrabold,
-      color: Colors.textPrimary,
-      letterSpacing: -1,
-      marginBottom: Spacing.xs,
-    },
-
-    fieldGroup: {
-      marginBottom: Spacing.lg,
-    },
-
-    input: {
-      backgroundColor: Colors.input,
-      borderRadius: Radius.lg,
-      borderWidth: 1,
-      borderColor: Colors.border,
-      paddingHorizontal: Spacing.md,
-      height: 52,
-      color: Colors.textPrimary,
-      fontSize: Typography.md,
-    },
-
-    showHideText: {
-      color: Colors.accent,
-      fontSize: Typography.xs,
-      fontWeight: Typography.bold,
-      letterSpacing: 0.8,
-    },
-
-    signupRow: {
-      alignItems: 'center',
-      marginTop: Spacing.xl,
-    },
-
-    signupLink: {
-      color: Colors.accent,
-      fontWeight: Typography.bold,
-    },
-  });
+const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: Spacing.xl * 2,
+  },
+  container: {
+    paddingHorizontal: Spacing.xxl,
+  },
+  header: {
+    marginBottom: Spacing.xxxl,
+  },
+  brandName: {
+    fontSize: Typography.h1,
+    fontWeight: Typography.extrabold,
+    color: Colors.textPrimary,
+    letterSpacing: -1,
+    marginBottom: Spacing.xs,
+  },
+  fieldGroup: {
+    marginBottom: Spacing.lg,
+  },
+  input: {
+    backgroundColor: Colors.input,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    height: 52,
+    color: Colors.textPrimary,
+    fontSize: Typography.md,
+  },
+  showHideText: {
+    color: Colors.accent,
+    fontSize: Typography.xs,
+    fontWeight: Typography.bold,
+    letterSpacing: 0.8,
+  },
+  signupRow: {
+    alignItems: 'center',
+    marginTop: Spacing.xl,
+  },
+  signupLink: {
+    color: Colors.accent,
+    fontWeight: Typography.bold,
+  },
+});

@@ -16,7 +16,6 @@ import { supabase } from '../utils/supabase';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Typography } from '@/app/styles/global';
 import S from '@/app/styles/global';
-import storage from '@/app/utils/storage';
 
 type RegisterErrors = {
   name?: string | null;
@@ -61,26 +60,57 @@ export default function RegisterScreen() {
     ]).start();
   };
 
+  const sanitize = (value: string) => {
+    return value
+      .replace(/[<>'"`;\\]/g, '')
+      .trim();
+  };
+
   const validate = () => {
     const newErrors: RegisterErrors = {};
+
+    const cleanName = sanitize(name);
+    const cleanEmail = sanitize(email);
+    const cleanPassword = sanitize(password);
+
+    if (
+      cleanName !== name.trim() ||
+      cleanEmail !== email.trim() ||
+      cleanPassword !== password.trim()
+    ) {
+      newErrors.email = 'Invalid characters detected';
+      setErrors(newErrors);
+      return false;
+    }
+
     if (!name.trim()) {
       newErrors.name = 'Name is required';
+    } else if (name.length > 50) {
+      newErrors.name = 'Name is too long';
     }
+
     if (!email.trim()) {
       newErrors.email = 'Email is required';
+    } else if (email.length > 100) {
+      newErrors.email = 'Email is too long';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Enter a valid email';
     }
+
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
+    } else if (password.length > 64) {
+      newErrors.password = 'Password is too long';
     }
+
     if (!confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -94,17 +124,17 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
-          data: { name }
+          data: { name: name.trim() }
         }
       });
 
       if (error) {
         setErrors({ email: error.message });
         triggerShake();
-        return; 
+        return;
       }
 
       await new Promise(res => setTimeout(res, 1500));
@@ -115,9 +145,9 @@ export default function RegisterScreen() {
     } finally {
       setLoading(false);
     }
-};
+  };
 
-  return (  
+  return (
     <KeyboardAvoidingView
       style={S.screenNoPad}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -155,6 +185,7 @@ export default function RegisterScreen() {
                 autoCapitalize="words"
                 autoCorrect={false}
                 returnKeyType="next"
+                maxLength={50}
                 onSubmitEditing={() => emailRef.current?.focus()}
               />
               {errors.name && <Text style={S.fieldError}>{errors.name}</Text>}
@@ -173,6 +204,7 @@ export default function RegisterScreen() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="next"
+                maxLength={100}
                 onSubmitEditing={() => passwordRef.current?.focus()}
               />
               {errors.email && <Text style={S.fieldError}>{errors.email}</Text>}
@@ -190,6 +222,7 @@ export default function RegisterScreen() {
                   onChangeText={t => { setPassword(t); setErrors(e => ({ ...e, password: null })); }}
                   secureTextEntry={!showPassword}
                   returnKeyType="next"
+                  maxLength={64}
                   onSubmitEditing={() => confirmRef.current?.focus()}
                 />
                 <TouchableOpacity
@@ -214,6 +247,7 @@ export default function RegisterScreen() {
                   onChangeText={t => { setConfirmPassword(t); setErrors(e => ({ ...e, confirmPassword: null })); }}
                   secureTextEntry={!showConfirm}
                   returnKeyType="done"
+                  maxLength={64}
                   onSubmitEditing={handleRegister}
                 />
                 <TouchableOpacity
